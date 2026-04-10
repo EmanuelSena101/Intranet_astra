@@ -11,15 +11,10 @@ export default function BilhetagemLigacoesPage() {
           <header className="glass rounded-[36px] p-8 md:p-10">
             <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
               <div className="max-w-3xl">
-                <BrandMark compact subtitle="Consulta operacional equivalente à tela principal de ligações do legado." />
+                <BrandMark compact />
                 <h1 className="mt-5 text-4xl font-semibold tracking-[-0.04em] md:text-5xl">
-                  Consulta geral de ligações
+                  Consulta de ligações
                 </h1>
-                <p className="mt-4 text-base leading-7 text-[var(--muted)] md:text-lg">
-                  Primeira tradução da tela `bl_ligacoes.htm` para o frontend novo.
-                  Os filtros já seguem o mesmo eixo funcional do legado e o relatório
-                  ainda está alimentado por mock.
-                </p>
               </div>
 
               <Link

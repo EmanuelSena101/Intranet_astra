@@ -12,8 +12,8 @@ type LoginState = {
 export function LoginForm() {
   const router = useRouter();
   const [form, setForm] = useState<LoginState>({
-    username: "admin",
-    password: "admin123"
+    username: "",
+    password: ""
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -92,12 +92,6 @@ export function LoginForm() {
       >
         {isSubmitting ? "Entrando..." : "Entrar"}
       </button>
-
-      <div className="brand-soft-panel rounded-2xl px-4 py-4 text-sm leading-6 text-[var(--muted)]">
-        <p className="font-semibold text-[var(--foreground)]">Usuários de desenvolvimento</p>
-        <p>`admin` / `admin123`</p>
-        <p>`bilhetagem` / `bilhetagem123`</p>
-      </div>
     </form>
   );
 }

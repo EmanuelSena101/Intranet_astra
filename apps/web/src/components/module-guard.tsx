@@ -74,8 +74,8 @@ export function ModuleGuard({ requiredModule, children }: ModuleGuardProps) {
 
   return (
     <GuardMessage
-      title="Validando acesso"
-      text="Conferindo autenticação e permissão do módulo."
+      title="Carregando"
+      text="Aguarde um momento."
     />
   );
 }
@@ -85,7 +85,7 @@ function GuardMessage({ title, text }: { title: string; text: string }) {
     <main className="shell-grid flex min-h-screen items-center justify-center px-6 py-8">
       <div className="section-card w-full max-w-xl rounded-[28px] p-8 text-center">
         <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[var(--primary)]">
-          Astra Intranet Modern
+          ASTRA
         </p>
         <h1 className="mt-3 text-3xl font-semibold tracking-[-0.03em]">{title}</h1>
         <p className="mt-4 text-base leading-7 text-[var(--muted)]">{text}</p>

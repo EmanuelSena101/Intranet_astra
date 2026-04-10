@@ -51,10 +51,10 @@ export function AuthGate() {
       <main className="shell-grid flex min-h-screen items-center justify-center px-6 py-8">
         <div className="section-card w-full max-w-xl rounded-[28px] p-8 text-center">
           <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[var(--primary)]">
-            Falha de sessão
+            Acesso
           </p>
           <h1 className="mt-3 text-3xl font-semibold tracking-[-0.03em]">
-            A fundação de autenticação ainda precisa de ajustes.
+            Não foi possível carregar sua sessão
           </h1>
           <p className="mt-4 text-base leading-7 text-[var(--muted)]">{state.message}</p>
         </div>
@@ -66,14 +66,11 @@ export function AuthGate() {
     <main className="shell-grid flex min-h-screen items-center justify-center px-6 py-8">
       <div className="section-card w-full max-w-md rounded-[28px] p-8 text-center">
         <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[var(--primary)]">
-          Astra Intranet Modern
+          ASTRA
         </p>
         <h1 className="mt-3 text-3xl font-semibold tracking-[-0.03em]">
-          Carregando sua sessão
+          Carregando
         </h1>
-        <p className="mt-4 text-base leading-7 text-[var(--muted)]">
-          Validando autenticação, permissões e módulos disponíveis.
-        </p>
       </div>
     </main>
   );

@@ -11,14 +11,10 @@ export default function BilhetagemCadastroDescricaoPage() {
           <header className="glass rounded-[36px] p-8 md:p-10">
             <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
               <div className="max-w-3xl">
-                <BrandMark compact subtitle="Cadastro de descrição de telefone preservando as regras atuais de inclusão, atualização e conflito." />
+                <BrandMark compact />
                 <h1 className="mt-5 text-4xl font-semibold tracking-[-0.04em] md:text-5xl">
                   Cadastro de descrição
                 </h1>
-                <p className="mt-4 text-base leading-7 text-[var(--muted)] md:text-lg">
-                  Este fluxo replica a regra do legado para telefones novos,
-                  telefones sem descrição e tentativas de duplicidade.
-                </p>
               </div>
 
               <Link

@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Astra Intranet Modern",
-  description: "Nova base para reescrita da intranet ASTRA"
+  title: "Astra Intranet",
+  description: "Portal corporativo ASTRA"
 };
 
 export default function RootLayout({
@@ -17,4 +17,3 @@ export default function RootLayout({
     </html>
   );
 }
-

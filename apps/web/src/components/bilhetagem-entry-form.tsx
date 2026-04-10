@@ -38,11 +38,7 @@ export function BilhetagemEntryForm() {
           "Content-Type": "application/json",
           Accept: "application/json"
         },
-        body: JSON.stringify({
-          ddd,
-          telephone,
-          description
-        })
+        body: JSON.stringify({ ddd, telephone, description })
       });
 
       const body = (await response.json().catch(() => null)) as
@@ -52,7 +48,6 @@ export function BilhetagemEntryForm() {
 
       if (!response.ok) {
         const apiError = body as ErrorResponse | null;
-
         setError(
           typeof apiError?.error === "string" ? apiError.error : "Falha ao cadastrar descrição."
         );
@@ -62,7 +57,7 @@ export function BilhetagemEntryForm() {
 
       setResult(body as UpsertResponse);
     } catch {
-      setError("Não foi possível salvar o telefone na API de Bilhetagem.");
+      setError("Não foi possível salvar o telefone.");
       setResult(null);
     } finally {
       setIsSubmitting(false);
@@ -136,16 +131,15 @@ export function BilhetagemEntryForm() {
 
       <section className="section-card rounded-[28px] p-6 md:p-8">
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
-          Retorno da API
+          Resultado
         </p>
         <h2 className="mt-2 text-2xl font-semibold tracking-[-0.03em]">
-          Resultado da operação
+          Retorno da operação
         </h2>
 
         {!result ? (
           <p className="mt-6 text-sm leading-6 text-[var(--muted)]">
-            O comportamento segue a regra atual do legado: cria telefone novo,
-            atualiza telefone sem descrição ou retorna conflito se já houver descrição.
+            Preencha o formulário e salve para ver o resultado.
           </p>
         ) : (
           <div className="brand-soft-panel mt-6 rounded-[24px] p-5">

@@ -11,14 +11,10 @@ export default function BilhetagemPesquisaPage() {
           <header className="glass rounded-[36px] p-8 md:p-10">
             <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
               <div className="max-w-3xl">
-                <BrandMark compact subtitle="Busca por número ou descrição preservando a mesma lógica do diretório telefônico atual." />
+                <BrandMark compact />
                 <h1 className="mt-5 text-4xl font-semibold tracking-[-0.04em] md:text-5xl">
                   Pesquisa de números e descrições
                 </h1>
-                <p className="mt-4 text-base leading-7 text-[var(--muted)] md:text-lg">
-                  Primeiro fluxo operacional do piloto. Mantém a lógica de busca
-                  do legado por telefone ou por descrição, agora via API.
-                </p>
               </div>
 
               <Link

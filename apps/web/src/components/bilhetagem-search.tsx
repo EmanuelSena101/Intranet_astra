@@ -32,9 +32,7 @@ export function BilhetagemSearch() {
         `${apiUrl("/bilhetagem/phone-book/search")}?mode=${mode}&query=${encodeURIComponent(query)}`,
         {
           credentials: "include",
-          headers: {
-            Accept: "application/json"
-          }
+          headers: { Accept: "application/json" }
         }
       );
 
@@ -48,7 +46,7 @@ export function BilhetagemSearch() {
       const payload = (await response.json()) as SearchResult;
       setResult(payload);
     } catch {
-      setError("Não foi possível consultar a API de Bilhetagem.");
+      setError("Não foi possível consultar o diretório telefônico.");
       setResult(null);
     } finally {
       setIsLoading(false);
@@ -117,7 +115,7 @@ export function BilhetagemSearch() {
 
         {!result ? (
           <p className="mt-6 text-sm leading-6 text-[var(--muted)]">
-            Execute uma busca para listar os resultados do diretório telefônico.
+            Execute uma busca para listar os resultados.
           </p>
         ) : result.entries.length === 0 ? (
           <div className="brand-soft-panel mt-6 rounded-2xl px-4 py-4 text-sm text-[var(--muted)]">

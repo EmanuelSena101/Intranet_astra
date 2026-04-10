@@ -258,11 +258,6 @@ export function BilhetagemCallReport() {
               />
             )}
 
-            <div className="brand-soft-panel rounded-[24px] p-5 text-sm leading-6 text-[var(--muted)]">
-              A tela replica a lógica do legado de `bl_ligacoes.htm`: período,
-              recebidas/efetuadas, internas/externas, ramal/número e saída resumida ou detalhada.
-            </div>
-
             {error ? <div className="brand-alert">{error}</div> : null}
 
             <button
@@ -282,12 +277,12 @@ export function BilhetagemCallReport() {
             Resultado
           </p>
           <h2 className="mt-2 text-2xl font-semibold tracking-[-0.03em]">
-            Totais da consulta
+            Totais
           </h2>
 
           {!report ? (
             <p className="mt-6 text-sm leading-6 text-[var(--muted)]">
-              Execute a consulta para carregar a visão de chamadas.
+              Execute a consulta para carregar os resultados.
             </p>
           ) : (
             <>
@@ -313,12 +308,12 @@ export function BilhetagemCallReport() {
             Visualização
           </p>
           <h2 className="mt-2 text-2xl font-semibold tracking-[-0.03em]">
-            {report?.filters.view === "summary" ? "Resumo por ramal" : "Prévia detalhada"}
+            {report?.filters.view === "summary" ? "Resumo por ramal" : "Detalhe"}
           </h2>
 
           {!report ? (
             <p className="mt-6 text-sm leading-6 text-[var(--muted)]">
-              A consulta detalhada será exibida aqui.
+              Os resultados serão exibidos aqui.
             </p>
           ) : report.filters.view === "summary" ? (
             <div className="mt-6 overflow-hidden rounded-[24px] border border-[var(--border)]">
@@ -331,7 +326,7 @@ export function BilhetagemCallReport() {
               <div className="divide-y divide-[var(--border)] bg-white/85">
                 {report.groups.length === 0 ? (
                   <div className="px-4 py-4 text-sm text-[var(--muted)]">
-                    Nenhum agrupamento encontrado.
+                    Nenhum resultado encontrado.
                   </div>
                 ) : (
                   report.groups.map((group) => (
@@ -363,7 +358,7 @@ export function BilhetagemCallReport() {
               <div className="divide-y divide-[var(--border)] bg-white/85">
                 {report.items.length === 0 ? (
                   <div className="px-4 py-4 text-sm text-[var(--muted)]">
-                    Nenhuma ligação encontrada para o filtro atual.
+                    Nenhuma ligação encontrada.
                   </div>
                 ) : (
                   report.items.map((item) => (
