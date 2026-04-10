@@ -17,4 +17,7 @@ public sealed class BilhetagemDirectoryOptions
 public sealed class BilhetagemCallsOptions
 {
     public string Provider { get; init; } = "mock";
+    public string? CallsTableName { get; init; }
+    public string? DirectoryTableName { get; init; }
+    public string? UsersTableName { get; init; }
 }

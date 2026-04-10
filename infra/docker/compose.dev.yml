@@ -45,6 +45,12 @@ services:
       OpenEdge__Database: ${OPENEDGE_DATABASE:-}
       OpenEdge__Username: ${OPENEDGE_USERNAME:-}
       OpenEdge__Password: ${OPENEDGE_PASSWORD:-}
+      Bilhetagem__Directory__Provider: ${BILHETAGEM_DIRECTORY_PROVIDER:-auto}
+      Bilhetagem__Directory__TableName: ${BILHETAGEM_DIRECTORY_TABLE_NAME:-}
+      Bilhetagem__Calls__Provider: ${BILHETAGEM_CALLS_PROVIDER:-mock}
+      Bilhetagem__Calls__CallsTableName: ${BILHETAGEM_CALLS_TABLE_NAME:-}
+      Bilhetagem__Calls__DirectoryTableName: ${BILHETAGEM_CALLS_DIRECTORY_TABLE_NAME:-}
+      Bilhetagem__Calls__UsersTableName: ${BILHETAGEM_CALLS_USERS_TABLE_NAME:-}
       ODBCINI: ${ODBCINI:-/etc/odbc.ini}
       ODBCSYSINI: ${ODBCSYSINI:-/etc}
       OPENEDGE_DRIVER_HOME: ${OPENEDGE_DRIVER_HOME:-/opt/openedge}
@@ -69,6 +75,12 @@ services:
       OpenEdge__Database: ${OPENEDGE_DATABASE:-}
       OpenEdge__Username: ${OPENEDGE_USERNAME:-}
       OpenEdge__Password: ${OPENEDGE_PASSWORD:-}
+      Bilhetagem__Directory__Provider: ${BILHETAGEM_DIRECTORY_PROVIDER:-auto}
+      Bilhetagem__Directory__TableName: ${BILHETAGEM_DIRECTORY_TABLE_NAME:-}
+      Bilhetagem__Calls__Provider: ${BILHETAGEM_CALLS_PROVIDER:-mock}
+      Bilhetagem__Calls__CallsTableName: ${BILHETAGEM_CALLS_TABLE_NAME:-}
+      Bilhetagem__Calls__DirectoryTableName: ${BILHETAGEM_CALLS_DIRECTORY_TABLE_NAME:-}
+      Bilhetagem__Calls__UsersTableName: ${BILHETAGEM_CALLS_USERS_TABLE_NAME:-}
       ODBCINI: ${ODBCINI:-/etc/odbc.ini}
       ODBCSYSINI: ${ODBCSYSINI:-/etc}
       OPENEDGE_DRIVER_HOME: ${OPENEDGE_DRIVER_HOME:-/opt/openedge}
@@ -78,4 +90,3 @@ services:
 volumes:
   caddy_data:
   caddy_config:
-

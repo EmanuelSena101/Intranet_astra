@@ -54,3 +54,19 @@ O piloto atual já cobre:
 - formulário inicial de `Ligacoes` com filtros de período, direção, escopo, ramal/número e saída resumida/detalhada
 
 O diretório telefônico está preparado para tentar `OpenEdge` quando `Bilhetagem:Directory:TableName` for configurado no `appsettings` ou via ambiente. Enquanto isso, o modo `auto` cai em `mock`.
+
+### Variáveis úteis
+
+- `BILHETAGEM_DIRECTORY_PROVIDER=auto`
+- `BILHETAGEM_DIRECTORY_TABLE_NAME=...`
+- `BILHETAGEM_CALLS_PROVIDER=mock`
+- `BILHETAGEM_CALLS_TABLE_NAME=...`
+- `BILHETAGEM_CALLS_DIRECTORY_TABLE_NAME=...`
+- `BILHETAGEM_CALLS_USERS_TABLE_NAME=...`
+
+Exemplo de primeiro passo para sair do `mock` no diretório:
+
+1. preencher `OPENEDGE_*`
+2. definir `BILHETAGEM_DIRECTORY_PROVIDER=auto`
+3. definir `BILHETAGEM_DIRECTORY_TABLE_NAME` com a tabela SQL equivalente a `lig-destino`
+4. subir a stack com `docker compose --env-file infra/docker/.env.example -f infra/docker/compose.dev.yml up --build`

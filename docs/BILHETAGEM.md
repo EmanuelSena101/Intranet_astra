@@ -95,6 +95,21 @@ Nesta etapa, o diretório telefônico do piloto está com backend `mock-backed`.
 Isso permite evoluir frontend, autenticação, permissões e contratos antes de
 ligar a implementação final ao OpenEdge.
 
+## Configuração de provider
+
+- `Bilhetagem__Directory__Provider=auto`
+  tenta `OpenEdge` no diretório e cai para `mock` se a conexão ou tabela não estiverem disponíveis
+- `Bilhetagem__Directory__TableName`
+  tabela SQL usada para `lig-destino`
+- `Bilhetagem__Calls__Provider=mock`
+  mantém `Ligacoes` em `mock` até a versão real ser ligada
+- `Bilhetagem__Calls__CallsTableName`
+  reserva o nome da tabela principal de chamadas
+- `Bilhetagem__Calls__DirectoryTableName`
+  reserva a tabela de descrições de destino
+- `Bilhetagem__Calls__UsersTableName`
+  reserva a tabela de usuários para dono da ligação
+
 ## Estado implementado
 
 - login e sessão já controlam acesso ao módulo via cookie auth
