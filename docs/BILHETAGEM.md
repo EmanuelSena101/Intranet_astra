@@ -87,6 +87,7 @@ Pela leitura do legado, as tabelas mais importantes do piloto parecem ser:
 - `GET /api/bilhetagem/bootstrap`
 - `GET /api/bilhetagem/phone-book/search`
 - `POST /api/bilhetagem/phone-book/entries`
+- `POST /api/bilhetagem/calls/report`
 
 ## Observação atual
 
@@ -101,4 +102,6 @@ ligar a implementação final ao OpenEdge.
 - rota `/bilhetagem` já consome `GET /api/bilhetagem/bootstrap`
 - rota `/bilhetagem/pesquisa` já consome `GET /api/bilhetagem/phone-book/search`
 - rota `/bilhetagem/cadastro-descricao` já consome `POST /api/bilhetagem/phone-book/entries`
+- rota `/bilhetagem/ligacoes` já consome `POST /api/bilhetagem/calls/report`
 - o backend atual do piloto ainda é `mock`, com regras de criação, atualização e conflito alinhadas ao legado
+- o diretório já está preparado para tentar `OpenEdge` primeiro quando a tabela for configurada, com fallback para `mock` em modo `auto`

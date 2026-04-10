@@ -1,0 +1,168 @@
+using System.Data.Odbc;
+using Microsoft.Extensions.Options;
+
+namespace Astra.Intranet.Api.Bilhetagem;
+
+public sealed class OpenEdgeBilhetagemDirectoryService(
+    IOptions<global::OpenEdgeOptions> openEdgeOptions,
+    IOptions<BilhetagemOptions> bilhetagemOptions)
+{
+    private readonly global::OpenEdgeOptions _openEdgeOptions = openEdgeOptions.Value;
+    private readonly BilhetagemDirectoryOptions _directoryOptions = bilhetagemOptions.Value.Directory;
+
+    public string SourceName => "openedge";
+
+    public bool IsConfigured =>
+        !string.IsNullOrWhiteSpace(_openEdgeOptions.BuildConnectionString()) &&
+        !string.IsNullOrWhiteSpace(_directoryOptions.TableName);
+
+    public async Task<BilhetagemDirectorySearchResult?> SearchAsync(
+        BilhetagemSearchMode mode,
+        string query,
+        CancellationToken cancellationToken)
+    {
+        if (!IsConfigured)
+        {
+            return null;
+        }
+
+        var normalizedQuery = mode == BilhetagemSearchMode.Number
+            ? DigitsOnly(query)
+            : query.Trim().ToUpperInvariant();
+
+        var fieldName = mode == BilhetagemSearchMode.Number ? "numero" : "descricao";
+        var commandText = $"""
+            select numero, descricao
+            from {_directoryOptions.TableName}
+            where {fieldName} like ?
+            order by descricao, numero
+            """;
+
+        var entries = new List<BilhetagemDirectoryEntry>();
+
+        using var connection = CreateConnection();
+        await connection.OpenAsync(cancellationToken);
+
+        using var command = new OdbcCommand(commandText, connection);
+        command.Parameters.AddWithValue("@p1", normalizedQuery + "%");
+
+        using var reader = await command.ExecuteReaderAsync(cancellationToken);
+
+        while (await reader.ReadAsync(cancellationToken))
+        {
+            entries.Add(
+                new BilhetagemDirectoryEntry(
+                    reader["numero"]?.ToString() ?? string.Empty,
+                    reader["descricao"]?.ToString() ?? string.Empty));
+        }
+
+        return new BilhetagemDirectorySearchResult(
+            SourceName,
+            mode == BilhetagemSearchMode.Number ? "number" : "description",
+            normalizedQuery,
+            entries);
+    }
+
+    public async Task<BilhetagemDirectoryUpsertResult?> UpsertAsync(
+        BilhetagemDirectoryUpsertRequest request,
+        CancellationToken cancellationToken)
+    {
+        if (!IsConfigured)
+        {
+            return null;
+        }
+
+        var normalizedNumber = BuildNumber(request.Ddd, request.Telephone);
+        var normalizedDescription = request.Description.Trim().ToUpperInvariant();
+
+        using var connection = CreateConnection();
+        await connection.OpenAsync(cancellationToken);
+
+        using var selectCommand = new OdbcCommand(
+            $"""
+            select numero, descricao
+            from {_directoryOptions.TableName}
+            where numero = ?
+            """,
+            connection);
+
+        selectCommand.Parameters.AddWithValue("@p1", normalizedNumber);
+
+        using var reader = await selectCommand.ExecuteReaderAsync(cancellationToken);
+
+        if (!await reader.ReadAsync(cancellationToken))
+        {
+            reader.Close();
+
+            using var insertCommand = new OdbcCommand(
+                $"""
+                insert into {_directoryOptions.TableName} (numero, descricao)
+                values (?, ?)
+                """,
+                connection);
+
+            insertCommand.Parameters.AddWithValue("@p1", normalizedNumber);
+            insertCommand.Parameters.AddWithValue("@p2", normalizedDescription);
+            await insertCommand.ExecuteNonQueryAsync(cancellationToken);
+
+            return new BilhetagemDirectoryUpsertResult(
+                BilhetagemDirectoryUpsertStatus.Created,
+                SourceName,
+                new BilhetagemDirectoryEntry(normalizedNumber, normalizedDescription),
+                "Telefone novo cadastrado com descricao.");
+        }
+
+        var currentDescription = reader["descricao"]?.ToString() ?? string.Empty;
+        reader.Close();
+
+        var currentEntry = new BilhetagemDirectoryEntry(normalizedNumber, currentDescription);
+
+        if (!string.IsNullOrWhiteSpace(currentDescription))
+        {
+            return new BilhetagemDirectoryUpsertResult(
+                BilhetagemDirectoryUpsertStatus.Conflict,
+                SourceName,
+                currentEntry,
+                "Telefone ja possui descricao cadastrada.");
+        }
+
+        using var updateCommand = new OdbcCommand(
+            $"""
+            update {_directoryOptions.TableName}
+            set descricao = ?
+            where numero = ?
+            """,
+            connection);
+
+        updateCommand.Parameters.AddWithValue("@p1", normalizedDescription);
+        updateCommand.Parameters.AddWithValue("@p2", normalizedNumber);
+        await updateCommand.ExecuteNonQueryAsync(cancellationToken);
+
+        return new BilhetagemDirectoryUpsertResult(
+            BilhetagemDirectoryUpsertStatus.Updated,
+            SourceName,
+            new BilhetagemDirectoryEntry(normalizedNumber, normalizedDescription),
+            "Descricao atualizada para telefone existente.");
+    }
+
+    private OdbcConnection CreateConnection() =>
+        new(_openEdgeOptions.BuildConnectionString()!);
+
+    private static string BuildNumber(string? ddd, string telephone)
+    {
+        var sanitizedTelephone = DigitsOnly(telephone);
+        var sanitizedDdd = DigitsOnly(ddd ?? string.Empty);
+
+        if (string.IsNullOrWhiteSpace(sanitizedDdd))
+        {
+            return sanitizedTelephone;
+        }
+
+        return sanitizedDdd == "011"
+            ? sanitizedTelephone
+            : sanitizedDdd + sanitizedTelephone;
+    }
+
+    private static string DigitsOnly(string value) =>
+        new(value.Where(char.IsDigit).ToArray());
+}

@@ -2,7 +2,7 @@ namespace Astra.Intranet.Api.Bilhetagem;
 
 public sealed class MockBilhetagemDirectoryService : IBilhetagemDirectoryService
 {
-    private const string SourceName = "mock";
+    private const string MockSourceName = "mock";
 
     private readonly object _lock = new();
     private readonly List<BilhetagemDirectoryEntry> _entries =
@@ -12,6 +12,8 @@ public sealed class MockBilhetagemDirectoryService : IBilhetagemDirectoryService
         new("19995554444", "CLIENTE PRIORITARIO"),
         new("1140028922", string.Empty)
     ];
+
+    public string SourceName => MockSourceName;
 
     public Task<BilhetagemDirectorySearchResult> SearchAsync(
         BilhetagemSearchMode mode,
@@ -40,7 +42,7 @@ public sealed class MockBilhetagemDirectoryService : IBilhetagemDirectoryService
 
         return Task.FromResult(
             new BilhetagemDirectorySearchResult(
-                SourceName,
+                MockSourceName,
                 mode == BilhetagemSearchMode.Number ? "number" : "description",
                 normalizedQuery,
                 results));
@@ -68,7 +70,7 @@ public sealed class MockBilhetagemDirectoryService : IBilhetagemDirectoryService
                 return Task.FromResult(
                     new BilhetagemDirectoryUpsertResult(
                         BilhetagemDirectoryUpsertStatus.Created,
-                        SourceName,
+                        MockSourceName,
                         createdEntry,
                         "Telefone novo cadastrado com descricao."));
             }
@@ -78,7 +80,7 @@ public sealed class MockBilhetagemDirectoryService : IBilhetagemDirectoryService
                 return Task.FromResult(
                     new BilhetagemDirectoryUpsertResult(
                         BilhetagemDirectoryUpsertStatus.Conflict,
-                        SourceName,
+                        MockSourceName,
                         existing,
                         "Telefone ja possui descricao cadastrada."));
             }
@@ -94,7 +96,7 @@ public sealed class MockBilhetagemDirectoryService : IBilhetagemDirectoryService
             return Task.FromResult(
                 new BilhetagemDirectoryUpsertResult(
                     BilhetagemDirectoryUpsertStatus.Updated,
-                    SourceName,
+                    MockSourceName,
                     updatedEntry,
                     "Descricao atualizada para telefone existente."));
         }

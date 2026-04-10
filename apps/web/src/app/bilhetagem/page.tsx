@@ -123,6 +123,12 @@ export default function BilhetagemPage() {
 
               <div className="mt-6 grid gap-3">
                 <Link
+                  href="/bilhetagem/ligacoes"
+                  className="rounded-2xl border border-[var(--border)] bg-white/85 px-4 py-4 text-sm font-semibold text-[var(--foreground)] transition hover:border-[var(--primary)] hover:text-[var(--primary)]"
+                >
+                  Consulta geral de ligações
+                </Link>
+                <Link
                   href="/bilhetagem/pesquisa"
                   className="rounded-2xl border border-[var(--border)] bg-white/85 px-4 py-4 text-sm font-semibold text-[var(--foreground)] transition hover:border-[var(--primary)] hover:text-[var(--primary)]"
                 >

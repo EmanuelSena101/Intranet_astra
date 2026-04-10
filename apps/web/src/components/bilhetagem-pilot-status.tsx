@@ -6,7 +6,8 @@ import { apiUrl } from "@/lib/api";
 type BilhetagemBootstrap = {
   module: string;
   status: string;
-  source: string;
+  directorySource: string;
+  callsSource: string;
   screens: string[];
   firstDeliverables: string[];
 };
@@ -98,7 +99,7 @@ export function BilhetagemPilotStatus() {
 
       {state.status === "loaded" ? (
         <>
-          <div className="mt-6 grid gap-4 md:grid-cols-3">
+          <div className="mt-6 grid gap-4 md:grid-cols-4">
             <div className="rounded-2xl border border-[var(--border)] bg-white/80 p-4">
               <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--muted)]">
                 Módulo
@@ -109,10 +110,18 @@ export function BilhetagemPilotStatus() {
             </div>
             <div className="rounded-2xl border border-[var(--border)] bg-white/80 p-4">
               <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--muted)]">
-                Fonte
+                Diretório
               </p>
               <p className="mt-2 text-sm font-semibold text-[var(--foreground)]">
-                {state.payload.source}
+                {state.payload.directorySource}
+              </p>
+            </div>
+            <div className="rounded-2xl border border-[var(--border)] bg-white/80 p-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--muted)]">
+                Ligações
+              </p>
+              <p className="mt-2 text-sm font-semibold text-[var(--foreground)]">
+                {state.payload.callsSource}
               </p>
             </div>
             <div className="rounded-2xl border border-[var(--border)] bg-white/80 p-4">

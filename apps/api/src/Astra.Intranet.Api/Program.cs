@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authentication;
 using System.Data.Odbc;
+using System.Globalization;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
@@ -12,6 +13,8 @@ builder.Services.Configure<OpenEdgeOptions>(
     builder.Configuration.GetSection(OpenEdgeOptions.SectionName));
 builder.Services.Configure<AuthOptions>(
     builder.Configuration.GetSection(AuthOptions.SectionName));
+builder.Services.Configure<BilhetagemOptions>(
+    builder.Configuration.GetSection(BilhetagemOptions.SectionName));
 
 var allowedOrigins = builder.Configuration
     .GetSection("Frontend:AllowedOrigins")
@@ -67,7 +70,10 @@ builder.Services
 
 builder.Services.AddAuthorization();
 builder.Services.AddSingleton<IAuthService, ConfiguredAuthService>();
-builder.Services.AddSingleton<IBilhetagemDirectoryService, MockBilhetagemDirectoryService>();
+builder.Services.AddSingleton<MockBilhetagemDirectoryService>();
+builder.Services.AddSingleton<OpenEdgeBilhetagemDirectoryService>();
+builder.Services.AddSingleton<IBilhetagemDirectoryService, BilhetagemDirectoryService>();
+builder.Services.AddSingleton<IBilhetagemCallsService, MockBilhetagemCallsService>();
 
 var app = builder.Build();
 
@@ -170,7 +176,10 @@ app.MapGet("/api/modules", [Authorize] (ClaimsPrincipal user) =>
 
 var bilhetagem = app.MapGroup("/api/bilhetagem").RequireAuthorization();
 
-bilhetagem.MapGet("/bootstrap", (ClaimsPrincipal user) =>
+bilhetagem.MapGet("/bootstrap", (
+    ClaimsPrincipal user,
+    IBilhetagemDirectoryService directoryService,
+    IBilhetagemCallsService callsService) =>
 {
     if (!HasModuleAccess(user, "Bilhetagem"))
     {
@@ -181,7 +190,8 @@ bilhetagem.MapGet("/bootstrap", (ClaimsPrincipal user) =>
     {
         module = "Bilhetagem",
         status = "pilot",
-        source = "mock",
+        directorySource = directoryService.SourceName,
+        callsSource = callsService.SourceName,
         screens = new[]
         {
             "bl_info.htm",
@@ -196,7 +206,9 @@ bilhetagem.MapGet("/bootstrap", (ClaimsPrincipal user) =>
             "Pesquisa por numero",
             "Pesquisa por descricao",
             "Cadastro de descricao",
-            "Filtros da listagem principal"
+            "Filtros da listagem principal",
+            "Relatorio resumido",
+            "Relatorio detalhado"
         }
     });
 });
@@ -265,6 +277,29 @@ bilhetagem.MapPost("/phone-book/entries", async (
         BilhetagemDirectoryUpsertStatus.Conflict => Results.Conflict(result),
         _ => Results.Ok(result)
     };
+});
+
+bilhetagem.MapPost("/calls/report", async (
+    BilhetagemCallReportRequest request,
+    ClaimsPrincipal user,
+    IBilhetagemCallsService service,
+    CancellationToken cancellationToken) =>
+{
+    if (!HasModuleAccess(user, "Bilhetagem"))
+    {
+        return Results.Forbid();
+    }
+
+    if (!TryBuildCallReportFilter(request, out var filter, out var validationError))
+    {
+        return Results.BadRequest(new
+        {
+            error = validationError
+        });
+    }
+
+    var report = await service.GenerateReportAsync(filter!, cancellationToken);
+    return Results.Ok(report);
 });
 
 app.MapGet("/api/health/database", async (
@@ -341,6 +376,221 @@ static string? ValidateDirectoryRequest(BilhetagemDirectoryUpsertRequest request
     }
 
     return null;
+}
+
+static bool TryBuildCallReportFilter(
+    BilhetagemCallReportRequest request,
+    out BilhetagemCallReportFilter? filter,
+    out string? validationError)
+{
+    filter = null;
+    validationError = null;
+
+    if (!TryParseCallDirection(request.Direction, out var direction))
+    {
+        validationError = "Direcao invalida. Use 'received', 'performed' ou 'both'.";
+        return false;
+    }
+
+    if (!TryParseCallScope(request.Scope, out var scope))
+    {
+        validationError = "Escopo invalido. Use 'internal', 'external' ou 'both'.";
+        return false;
+    }
+
+    if (!TryParseCallTargetType(request.TargetType, out var targetType))
+    {
+        validationError = "Tipo de alvo invalido. Use 'extension' ou 'number'.";
+        return false;
+    }
+
+    if (!TryParseCallView(request.View, out var view))
+    {
+        validationError = "Visualizacao invalida. Use 'summary' ou 'detailed'.";
+        return false;
+    }
+
+    if (!DateOnly.TryParseExact(
+            request.StartDate,
+            "yyyy-MM-dd",
+            CultureInfo.InvariantCulture,
+            DateTimeStyles.None,
+            out var startDate))
+    {
+        validationError = "Data inicial invalida.";
+        return false;
+    }
+
+    if (!DateOnly.TryParseExact(
+            request.EndDate,
+            "yyyy-MM-dd",
+            CultureInfo.InvariantCulture,
+            DateTimeStyles.None,
+            out var endDate))
+    {
+        validationError = "Data final invalida.";
+        return false;
+    }
+
+    if (endDate < startDate)
+    {
+        validationError = "A data final deve ser maior ou igual a data inicial.";
+        return false;
+    }
+
+    string? extensionStart = null;
+    string? extensionEnd = null;
+    string? number = null;
+
+    if (targetType == BilhetagemCallTargetType.Extension)
+    {
+        extensionStart = NormalizeDigits(request.ExtensionStart);
+        extensionEnd = NormalizeDigits(request.ExtensionEnd);
+
+        if (string.IsNullOrWhiteSpace(extensionStart))
+        {
+            extensionStart = "0000";
+        }
+
+        if (string.IsNullOrWhiteSpace(extensionEnd))
+        {
+            extensionEnd = "9999";
+        }
+
+        if (!int.TryParse(extensionStart, out var numericStart) ||
+            !int.TryParse(extensionEnd, out var numericEnd))
+        {
+            validationError = "Faixa de ramal invalida.";
+            return false;
+        }
+
+        if (numericEnd < numericStart)
+        {
+            validationError = "O ramal final deve ser maior ou igual ao ramal inicial.";
+            return false;
+        }
+
+        extensionStart = numericStart.ToString("0000");
+        extensionEnd = numericEnd.ToString("0000");
+    }
+    else
+    {
+        number = NormalizeDigits(request.Number);
+
+        if (string.IsNullOrWhiteSpace(number))
+        {
+            validationError = "Numero obrigatorio para pesquisa por numero.";
+            return false;
+        }
+    }
+
+    filter = new BilhetagemCallReportFilter(
+        direction,
+        scope,
+        targetType,
+        view,
+        startDate,
+        endDate,
+        extensionStart,
+        extensionEnd,
+        number);
+
+    return true;
+}
+
+static bool TryParseCallDirection(string value, out BilhetagemCallDirection direction)
+{
+    if (string.Equals(value, "received", StringComparison.OrdinalIgnoreCase))
+    {
+        direction = BilhetagemCallDirection.Received;
+        return true;
+    }
+
+    if (string.Equals(value, "performed", StringComparison.OrdinalIgnoreCase))
+    {
+        direction = BilhetagemCallDirection.Performed;
+        return true;
+    }
+
+    if (string.Equals(value, "both", StringComparison.OrdinalIgnoreCase))
+    {
+        direction = BilhetagemCallDirection.Both;
+        return true;
+    }
+
+    direction = default;
+    return false;
+}
+
+static bool TryParseCallScope(string value, out BilhetagemCallScope scope)
+{
+    if (string.Equals(value, "internal", StringComparison.OrdinalIgnoreCase))
+    {
+        scope = BilhetagemCallScope.Internal;
+        return true;
+    }
+
+    if (string.Equals(value, "external", StringComparison.OrdinalIgnoreCase))
+    {
+        scope = BilhetagemCallScope.External;
+        return true;
+    }
+
+    if (string.Equals(value, "both", StringComparison.OrdinalIgnoreCase))
+    {
+        scope = BilhetagemCallScope.Both;
+        return true;
+    }
+
+    scope = default;
+    return false;
+}
+
+static bool TryParseCallTargetType(string value, out BilhetagemCallTargetType targetType)
+{
+    if (string.Equals(value, "extension", StringComparison.OrdinalIgnoreCase))
+    {
+        targetType = BilhetagemCallTargetType.Extension;
+        return true;
+    }
+
+    if (string.Equals(value, "number", StringComparison.OrdinalIgnoreCase))
+    {
+        targetType = BilhetagemCallTargetType.Number;
+        return true;
+    }
+
+    targetType = default;
+    return false;
+}
+
+static bool TryParseCallView(string value, out BilhetagemCallView view)
+{
+    if (string.Equals(value, "summary", StringComparison.OrdinalIgnoreCase))
+    {
+        view = BilhetagemCallView.Summary;
+        return true;
+    }
+
+    if (string.Equals(value, "detailed", StringComparison.OrdinalIgnoreCase))
+    {
+        view = BilhetagemCallView.Detailed;
+        return true;
+    }
+
+    view = default;
+    return false;
+}
+
+static string? NormalizeDigits(string? value)
+{
+    if (string.IsNullOrWhiteSpace(value))
+    {
+        return null;
+    }
+
+    var digits = new string(value.Where(char.IsDigit).ToArray());
+    return string.IsNullOrWhiteSpace(digits) ? null : digits;
 }
 
 static CurrentUserResponse ToCurrentUserResponse(AuthenticatedUser user) =>

@@ -2,6 +2,8 @@ namespace Astra.Intranet.Api.Bilhetagem;
 
 public interface IBilhetagemDirectoryService
 {
+    string SourceName { get; }
+
     Task<BilhetagemDirectorySearchResult> SearchAsync(
         BilhetagemSearchMode mode,
         string query,
@@ -11,4 +13,3 @@ public interface IBilhetagemDirectoryService
         BilhetagemDirectoryUpsertRequest request,
         CancellationToken cancellationToken);
 }
-
