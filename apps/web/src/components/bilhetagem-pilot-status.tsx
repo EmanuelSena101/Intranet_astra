@@ -6,10 +6,20 @@ import { apiUrl } from "@/lib/api";
 type BilhetagemBootstrap = {
   module: string;
   status: string;
-  directorySource: string;
-  callsSource: string;
-  screens: string[];
-  firstDeliverables: string[];
+  directory: {
+    provider: string;
+    source: string;
+    openEdgeConfigured: boolean;
+    tableName?: string | null;
+  };
+  calls: {
+    provider: string;
+    source: string;
+    openEdgeConfigured: boolean;
+    callsTableName?: string | null;
+    directoryTableName?: string | null;
+    usersTableName?: string | null;
+  };
 };
 
 type BootstrapState =
@@ -106,7 +116,7 @@ export function BilhetagemPilotStatus() {
                 Diretório
               </p>
               <p className="mt-2 text-sm font-semibold text-[var(--foreground)]">
-                {state.payload.directorySource}
+                {state.payload.directory.source}
               </p>
             </div>
             <div className="brand-metric rounded-2xl p-4">
@@ -114,7 +124,7 @@ export function BilhetagemPilotStatus() {
                 Ligações
               </p>
               <p className="mt-2 text-sm font-semibold text-[var(--foreground)]">
-                {state.payload.callsSource}
+                {state.payload.calls.source}
               </p>
             </div>
             <div className="brand-metric rounded-2xl p-4">
@@ -126,8 +136,65 @@ export function BilhetagemPilotStatus() {
               </p>
             </div>
           </div>
+
+          <div className="mt-6 grid gap-6 lg:grid-cols-2">
+            <div className="brand-soft-panel rounded-[24px] p-5">
+              <p className="text-sm font-semibold uppercase tracking-[0.14em] text-[var(--primary)]">
+                Diretório telefônico
+              </p>
+              <div className="mt-4 grid gap-3">
+                <StatusRow label="Provider" value={state.payload.directory.provider} />
+                <StatusRow label="Fonte ativa" value={state.payload.directory.source} />
+                <StatusRow
+                  label="OpenEdge"
+                  value={state.payload.directory.openEdgeConfigured ? "configurado" : "não configurado"}
+                />
+                <StatusRow
+                  label="Tabela"
+                  value={state.payload.directory.tableName || "não informada"}
+                />
+              </div>
+            </div>
+
+            <div className="brand-soft-panel rounded-[24px] p-5">
+              <p className="text-sm font-semibold uppercase tracking-[0.14em] text-[var(--primary)]">
+                Ligações
+              </p>
+              <div className="mt-4 grid gap-3">
+                <StatusRow label="Provider" value={state.payload.calls.provider} />
+                <StatusRow label="Fonte ativa" value={state.payload.calls.source} />
+                <StatusRow
+                  label="OpenEdge"
+                  value={state.payload.calls.openEdgeConfigured ? "configurado" : "não configurado"}
+                />
+                <StatusRow
+                  label="Tabela de ligações"
+                  value={state.payload.calls.callsTableName || "não informada"}
+                />
+                <StatusRow
+                  label="Tabela de descrições"
+                  value={state.payload.calls.directoryTableName || "não informada"}
+                />
+                <StatusRow
+                  label="Tabela de usuários"
+                  value={state.payload.calls.usersTableName || "não informada"}
+                />
+              </div>
+            </div>
+          </div>
         </>
       ) : null}
     </article>
+  );
+}
+
+function StatusRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="brand-soft-panel rounded-2xl px-4 py-3">
+      <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--muted)]">
+        {label}
+      </p>
+      <p className="mt-2 text-sm font-medium text-[var(--foreground)]">{value}</p>
+    </div>
   );
 }

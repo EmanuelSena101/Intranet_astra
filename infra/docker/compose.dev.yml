@@ -47,10 +47,25 @@ services:
       OpenEdge__Password: ${OPENEDGE_PASSWORD:-}
       Bilhetagem__Directory__Provider: ${BILHETAGEM_DIRECTORY_PROVIDER:-auto}
       Bilhetagem__Directory__TableName: ${BILHETAGEM_DIRECTORY_TABLE_NAME:-}
-      Bilhetagem__Calls__Provider: ${BILHETAGEM_CALLS_PROVIDER:-mock}
+      Bilhetagem__Calls__Provider: ${BILHETAGEM_CALLS_PROVIDER:-auto}
       Bilhetagem__Calls__CallsTableName: ${BILHETAGEM_CALLS_TABLE_NAME:-}
       Bilhetagem__Calls__DirectoryTableName: ${BILHETAGEM_CALLS_DIRECTORY_TABLE_NAME:-}
       Bilhetagem__Calls__UsersTableName: ${BILHETAGEM_CALLS_USERS_TABLE_NAME:-}
+      Bilhetagem__Calls__DateField: ${BILHETAGEM_CALLS_DATE_FIELD:-data}
+      Bilhetagem__Calls__TimeField: ${BILHETAGEM_CALLS_TIME_FIELD:-hora}
+      Bilhetagem__Calls__ExtensionField: ${BILHETAGEM_CALLS_EXTENSION_FIELD:-ramal}
+      Bilhetagem__Calls__NumberField: ${BILHETAGEM_CALLS_NUMBER_FIELD:-numero}
+      Bilhetagem__Calls__DurationField: ${BILHETAGEM_CALLS_DURATION_FIELD:-duracao}
+      Bilhetagem__Calls__TypeCodeField: ${BILHETAGEM_CALLS_TYPE_CODE_FIELD:-fl-ligacao}
+      Bilhetagem__Calls__CityField: ${BILHETAGEM_CALLS_CITY_FIELD:-cidade}
+      Bilhetagem__Calls__StateField: ${BILHETAGEM_CALLS_STATE_FIELD:-uf}
+      Bilhetagem__Calls__CostField: ${BILHETAGEM_CALLS_COST_FIELD:-custo}
+      Bilhetagem__Calls__DestinationField: ${BILHETAGEM_CALLS_DESTINATION_FIELD:-ramal-solicitado}
+      Bilhetagem__Calls__OwnerIdField: ${BILHETAGEM_CALLS_OWNER_ID_FIELD:-fc-codigo}
+      Bilhetagem__Calls__DirectoryNumberField: ${BILHETAGEM_CALLS_DIRECTORY_NUMBER_FIELD:-numero}
+      Bilhetagem__Calls__DirectoryDescriptionField: ${BILHETAGEM_CALLS_DIRECTORY_DESCRIPTION_FIELD:-descricao}
+      Bilhetagem__Calls__UserIdField: ${BILHETAGEM_CALLS_USER_ID_FIELD:-registro}
+      Bilhetagem__Calls__UserNameField: ${BILHETAGEM_CALLS_USER_NAME_FIELD:-nome}
       ODBCINI: ${ODBCINI:-/etc/odbc.ini}
       ODBCSYSINI: ${ODBCSYSINI:-/etc}
       OPENEDGE_DRIVER_HOME: ${OPENEDGE_DRIVER_HOME:-/opt/openedge}
@@ -77,10 +92,25 @@ services:
       OpenEdge__Password: ${OPENEDGE_PASSWORD:-}
       Bilhetagem__Directory__Provider: ${BILHETAGEM_DIRECTORY_PROVIDER:-auto}
       Bilhetagem__Directory__TableName: ${BILHETAGEM_DIRECTORY_TABLE_NAME:-}
-      Bilhetagem__Calls__Provider: ${BILHETAGEM_CALLS_PROVIDER:-mock}
+      Bilhetagem__Calls__Provider: ${BILHETAGEM_CALLS_PROVIDER:-auto}
       Bilhetagem__Calls__CallsTableName: ${BILHETAGEM_CALLS_TABLE_NAME:-}
       Bilhetagem__Calls__DirectoryTableName: ${BILHETAGEM_CALLS_DIRECTORY_TABLE_NAME:-}
       Bilhetagem__Calls__UsersTableName: ${BILHETAGEM_CALLS_USERS_TABLE_NAME:-}
+      Bilhetagem__Calls__DateField: ${BILHETAGEM_CALLS_DATE_FIELD:-data}
+      Bilhetagem__Calls__TimeField: ${BILHETAGEM_CALLS_TIME_FIELD:-hora}
+      Bilhetagem__Calls__ExtensionField: ${BILHETAGEM_CALLS_EXTENSION_FIELD:-ramal}
+      Bilhetagem__Calls__NumberField: ${BILHETAGEM_CALLS_NUMBER_FIELD:-numero}
+      Bilhetagem__Calls__DurationField: ${BILHETAGEM_CALLS_DURATION_FIELD:-duracao}
+      Bilhetagem__Calls__TypeCodeField: ${BILHETAGEM_CALLS_TYPE_CODE_FIELD:-fl-ligacao}
+      Bilhetagem__Calls__CityField: ${BILHETAGEM_CALLS_CITY_FIELD:-cidade}
+      Bilhetagem__Calls__StateField: ${BILHETAGEM_CALLS_STATE_FIELD:-uf}
+      Bilhetagem__Calls__CostField: ${BILHETAGEM_CALLS_COST_FIELD:-custo}
+      Bilhetagem__Calls__DestinationField: ${BILHETAGEM_CALLS_DESTINATION_FIELD:-ramal-solicitado}
+      Bilhetagem__Calls__OwnerIdField: ${BILHETAGEM_CALLS_OWNER_ID_FIELD:-fc-codigo}
+      Bilhetagem__Calls__DirectoryNumberField: ${BILHETAGEM_CALLS_DIRECTORY_NUMBER_FIELD:-numero}
+      Bilhetagem__Calls__DirectoryDescriptionField: ${BILHETAGEM_CALLS_DIRECTORY_DESCRIPTION_FIELD:-descricao}
+      Bilhetagem__Calls__UserIdField: ${BILHETAGEM_CALLS_USER_ID_FIELD:-registro}
+      Bilhetagem__Calls__UserNameField: ${BILHETAGEM_CALLS_USER_NAME_FIELD:-nome}
       ODBCINI: ${ODBCINI:-/etc/odbc.ini}
       ODBCSYSINI: ${ODBCSYSINI:-/etc}
       OPENEDGE_DRIVER_HOME: ${OPENEDGE_DRIVER_HOME:-/opt/openedge}

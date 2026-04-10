@@ -26,16 +26,19 @@ public sealed class OpenEdgeBilhetagemDirectoryService(
             return null;
         }
 
+        var tableName = OpenEdgeSqlIdentifier.Quote(_directoryOptions.TableName!);
+        var numberField = OpenEdgeSqlIdentifier.Quote("numero");
+        var descriptionField = OpenEdgeSqlIdentifier.Quote("descricao");
         var normalizedQuery = mode == BilhetagemSearchMode.Number
             ? DigitsOnly(query)
             : query.Trim().ToUpperInvariant();
 
-        var fieldName = mode == BilhetagemSearchMode.Number ? "numero" : "descricao";
+        var fieldName = mode == BilhetagemSearchMode.Number ? numberField : descriptionField;
         var commandText = $"""
-            select numero, descricao
-            from {_directoryOptions.TableName}
+            select {numberField} as numero, {descriptionField} as descricao
+            from {tableName}
             where {fieldName} like ?
-            order by descricao, numero
+            order by {descriptionField}, {numberField}
             """;
 
         var entries = new List<BilhetagemDirectoryEntry>();
@@ -74,15 +77,18 @@ public sealed class OpenEdgeBilhetagemDirectoryService(
 
         var normalizedNumber = BuildNumber(request.Ddd, request.Telephone);
         var normalizedDescription = request.Description.Trim().ToUpperInvariant();
+        var tableName = OpenEdgeSqlIdentifier.Quote(_directoryOptions.TableName!);
+        var numberField = OpenEdgeSqlIdentifier.Quote("numero");
+        var descriptionField = OpenEdgeSqlIdentifier.Quote("descricao");
 
         using var connection = CreateConnection();
         await connection.OpenAsync(cancellationToken);
 
         using var selectCommand = new OdbcCommand(
             $"""
-            select numero, descricao
-            from {_directoryOptions.TableName}
-            where numero = ?
+            select {numberField} as numero, {descriptionField} as descricao
+            from {tableName}
+            where {numberField} = ?
             """,
             connection);
 
@@ -96,7 +102,7 @@ public sealed class OpenEdgeBilhetagemDirectoryService(
 
             using var insertCommand = new OdbcCommand(
                 $"""
-                insert into {_directoryOptions.TableName} (numero, descricao)
+                insert into {tableName} ({numberField}, {descriptionField})
                 values (?, ?)
                 """,
                 connection);
@@ -128,9 +134,9 @@ public sealed class OpenEdgeBilhetagemDirectoryService(
 
         using var updateCommand = new OdbcCommand(
             $"""
-            update {_directoryOptions.TableName}
-            set descricao = ?
-            where numero = ?
+            update {tableName}
+            set {descriptionField} = ?
+            where {numberField} = ?
             """,
             connection);
 

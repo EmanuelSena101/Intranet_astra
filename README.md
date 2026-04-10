@@ -29,8 +29,8 @@ Este repositório já nasce com:
 - `compose` para dev e para Portainer
 - `Caddy` como edge proxy
 - placeholders de configuração para OpenEdge ODBC
-- piloto inicial de `Bilhetagem` com pesquisa e cadastro usando backend mock
-- filtros iniciais de `Bilhetagem > Ligacoes`, ainda em `mock`
+- piloto inicial de `Bilhetagem` com pesquisa e cadastro
+- `Bilhetagem > Ligacoes` pronto para tentar `OpenEdge` por configuração, com fallback para `mock`
 
 ## Observação importante
 
@@ -59,10 +59,11 @@ O diretório telefônico está preparado para tentar `OpenEdge` quando `Bilhetag
 
 - `BILHETAGEM_DIRECTORY_PROVIDER=auto`
 - `BILHETAGEM_DIRECTORY_TABLE_NAME=...`
-- `BILHETAGEM_CALLS_PROVIDER=mock`
+- `BILHETAGEM_CALLS_PROVIDER=auto`
 - `BILHETAGEM_CALLS_TABLE_NAME=...`
 - `BILHETAGEM_CALLS_DIRECTORY_TABLE_NAME=...`
 - `BILHETAGEM_CALLS_USERS_TABLE_NAME=...`
+- `BILHETAGEM_CALLS_*_FIELD=...`
 
 Exemplo de primeiro passo para sair do `mock` no diretório:
 

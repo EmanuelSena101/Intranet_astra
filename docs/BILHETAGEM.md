@@ -89,26 +89,22 @@ Pela leitura do legado, as tabelas mais importantes do piloto parecem ser:
 - `POST /api/bilhetagem/phone-book/entries`
 - `POST /api/bilhetagem/calls/report`
 
-## Observação atual
-
-Nesta etapa, o diretório telefônico do piloto está com backend `mock-backed`.
-Isso permite evoluir frontend, autenticação, permissões e contratos antes de
-ligar a implementação final ao OpenEdge.
-
 ## Configuração de provider
 
 - `Bilhetagem__Directory__Provider=auto`
   tenta `OpenEdge` no diretório e cai para `mock` se a conexão ou tabela não estiverem disponíveis
 - `Bilhetagem__Directory__TableName`
   tabela SQL usada para `lig-destino`
-- `Bilhetagem__Calls__Provider=mock`
-  mantém `Ligacoes` em `mock` até a versão real ser ligada
+- `Bilhetagem__Calls__Provider=auto`
+  tenta `OpenEdge` em `Ligacoes` e cai para `mock` se a conexão ou a tabela principal não estiverem disponíveis
 - `Bilhetagem__Calls__CallsTableName`
-  reserva o nome da tabela principal de chamadas
+  tabela SQL principal equivalente a `lig-ligacao`
 - `Bilhetagem__Calls__DirectoryTableName`
-  reserva a tabela de descrições de destino
+  tabela SQL de descrições equivalente a `lig-destino`
 - `Bilhetagem__Calls__UsersTableName`
-  reserva a tabela de usuários para dono da ligação
+  tabela SQL de usuários equivalente a `net-usuarios`
+- `Bilhetagem__Calls__*Field`
+  permite ajustar nomes de coluna sem editar código quando a camada SQL do OpenEdge usar nomes diferentes dos do ABL
 
 ## Estado implementado
 
@@ -118,5 +114,6 @@ ligar a implementação final ao OpenEdge.
 - rota `/bilhetagem/pesquisa` já consome `GET /api/bilhetagem/phone-book/search`
 - rota `/bilhetagem/cadastro-descricao` já consome `POST /api/bilhetagem/phone-book/entries`
 - rota `/bilhetagem/ligacoes` já consome `POST /api/bilhetagem/calls/report`
-- o backend atual do piloto ainda é `mock`, com regras de criação, atualização e conflito alinhadas ao legado
-- o diretório já está preparado para tentar `OpenEdge` primeiro quando a tabela for configurada, com fallback para `mock` em modo `auto`
+- o diretório já tenta `OpenEdge` primeiro quando a tabela for configurada, com fallback para `mock` em modo `auto`
+- `Ligacoes` já tenta `OpenEdge` primeiro quando `lig-ligacao` e a conexão estiverem configuradas, com fallback para `mock` em modo `auto`
+- a API de `Ligacoes` já lê período, número/ramal, descrição e dono da ligação a partir de `lig-ligacao`, `lig-destino` e `net-usuarios` quando essas tabelas forem informadas

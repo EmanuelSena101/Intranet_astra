@@ -11,15 +11,23 @@ public sealed class BilhetagemDirectoryService(
     private readonly MockBilhetagemDirectoryService _mockService = mockService;
     private readonly OpenEdgeBilhetagemDirectoryService _openEdgeService = openEdgeService;
 
-    public string SourceName => PreferOpenEdge() ? _openEdgeService.SourceName : _mockService.SourceName;
+    public string SourceName => ResolveConfiguredProvider() switch
+    {
+        "openedge" => _openEdgeService.SourceName,
+        _ => _mockService.SourceName
+    };
 
     public async Task<BilhetagemDirectorySearchResult> SearchAsync(
         BilhetagemSearchMode mode,
         string query,
         CancellationToken cancellationToken)
     {
-        if (PreferOpenEdge())
+        var provider = ResolveConfiguredProvider();
+
+        if (provider == "openedge")
         {
+            EnsureOpenEdgeConfigured();
+
             try
             {
                 var result = await _openEdgeService.SearchAsync(mode, query, cancellationToken);
@@ -41,8 +49,12 @@ public sealed class BilhetagemDirectoryService(
         BilhetagemDirectoryUpsertRequest request,
         CancellationToken cancellationToken)
     {
-        if (PreferOpenEdge())
+        var provider = ResolveConfiguredProvider();
+
+        if (provider == "openedge")
         {
+            EnsureOpenEdgeConfigured();
+
             try
             {
                 var result = await _openEdgeService.UpsertAsync(request, cancellationToken);
@@ -60,15 +72,15 @@ public sealed class BilhetagemDirectoryService(
         return await _mockService.UpsertAsync(request, cancellationToken);
     }
 
-    private bool PreferOpenEdge()
+    private string ResolveConfiguredProvider()
     {
         var provider = (_options.Directory.Provider ?? "auto").Trim().ToLowerInvariant();
 
         return provider switch
         {
-            "openedge" => _openEdgeService.IsConfigured,
-            "auto" => _openEdgeService.IsConfigured,
-            _ => false
+            "openedge" => "openedge",
+            "auto" when _openEdgeService.IsConfigured => "openedge",
+            _ => "mock"
         };
     }
 
@@ -76,5 +88,16 @@ public sealed class BilhetagemDirectoryService(
     {
         var provider = (_options.Directory.Provider ?? "auto").Trim().ToLowerInvariant();
         return provider == "auto";
+    }
+
+    private void EnsureOpenEdgeConfigured()
+    {
+        if (_openEdgeService.IsConfigured)
+        {
+            return;
+        }
+
+        throw new InvalidOperationException(
+            "Bilhetagem directory provider is set to OpenEdge, but the connection or table name is not configured.");
     }
 }

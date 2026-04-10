@@ -73,7 +73,9 @@ builder.Services.AddSingleton<IAuthService, ConfiguredAuthService>();
 builder.Services.AddSingleton<MockBilhetagemDirectoryService>();
 builder.Services.AddSingleton<OpenEdgeBilhetagemDirectoryService>();
 builder.Services.AddSingleton<IBilhetagemDirectoryService, BilhetagemDirectoryService>();
-builder.Services.AddSingleton<IBilhetagemCallsService, MockBilhetagemCallsService>();
+builder.Services.AddSingleton<MockBilhetagemCallsService>();
+builder.Services.AddSingleton<OpenEdgeBilhetagemCallsService>();
+builder.Services.AddSingleton<IBilhetagemCallsService, BilhetagemCallsService>();
 
 var app = builder.Build();
 
@@ -178,37 +180,38 @@ var bilhetagem = app.MapGroup("/api/bilhetagem").RequireAuthorization();
 
 bilhetagem.MapGet("/bootstrap", (
     ClaimsPrincipal user,
+    IOptions<BilhetagemOptions> options,
     IBilhetagemDirectoryService directoryService,
-    IBilhetagemCallsService callsService) =>
+    IBilhetagemCallsService callsService,
+    OpenEdgeBilhetagemDirectoryService openEdgeDirectoryService,
+    OpenEdgeBilhetagemCallsService openEdgeCallsService) =>
 {
     if (!HasModuleAccess(user, "Bilhetagem"))
     {
         return Results.Forbid();
     }
 
+    var bilhetagemOptions = options.Value;
+
     return Results.Ok(new
     {
         module = "Bilhetagem",
-        status = "pilot",
-        directorySource = directoryService.SourceName,
-        callsSource = callsService.SourceName,
-        screens = new[]
+        status = "available",
+        directory = new
         {
-            "bl_info.htm",
-            "bl_busca_numero.htm",
-            "bl_cad_descricao.htm",
-            "bl_ligacoes.htm",
-            "bl_ligacoes_res.htm",
-            "bl_ligacoes_det.htm"
+            provider = bilhetagemOptions.Directory.Provider,
+            source = directoryService.SourceName,
+            openEdgeConfigured = openEdgeDirectoryService.IsConfigured,
+            tableName = bilhetagemOptions.Directory.TableName
         },
-        firstDeliverables = new[]
+        calls = new
         {
-            "Pesquisa por numero",
-            "Pesquisa por descricao",
-            "Cadastro de descricao",
-            "Filtros da listagem principal",
-            "Relatorio resumido",
-            "Relatorio detalhado"
+            provider = bilhetagemOptions.Calls.Provider,
+            source = callsService.SourceName,
+            openEdgeConfigured = openEdgeCallsService.IsConfigured,
+            callsTableName = bilhetagemOptions.Calls.CallsTableName,
+            directoryTableName = bilhetagemOptions.Calls.DirectoryTableName,
+            usersTableName = bilhetagemOptions.Calls.UsersTableName
         }
     });
 });
@@ -241,8 +244,18 @@ bilhetagem.MapGet("/phone-book/search", async (
         });
     }
 
-    var result = await service.SearchAsync(parsedMode, query, cancellationToken);
-    return Results.Ok(result);
+    try
+    {
+        var result = await service.SearchAsync(parsedMode, query, cancellationToken);
+        return Results.Ok(result);
+    }
+    catch (InvalidOperationException exception)
+    {
+        return Results.Problem(
+            title: "Diretorio telefonico indisponivel",
+            detail: exception.Message,
+            statusCode: StatusCodes.Status503ServiceUnavailable);
+    }
 });
 
 bilhetagem.MapPost("/phone-book/entries", async (
@@ -266,17 +279,27 @@ bilhetagem.MapPost("/phone-book/entries", async (
         });
     }
 
-    var result = await service.UpsertAsync(request, cancellationToken);
-
-    return result.Status switch
+    try
     {
-        BilhetagemDirectoryUpsertStatus.Created => Results.Created(
-            $"/api/bilhetagem/phone-book/search?mode=number&query={Uri.EscapeDataString(result.Entry.Number)}",
-            result),
-        BilhetagemDirectoryUpsertStatus.Updated => Results.Ok(result),
-        BilhetagemDirectoryUpsertStatus.Conflict => Results.Conflict(result),
-        _ => Results.Ok(result)
-    };
+        var result = await service.UpsertAsync(request, cancellationToken);
+
+        return result.Status switch
+        {
+            BilhetagemDirectoryUpsertStatus.Created => Results.Created(
+                $"/api/bilhetagem/phone-book/search?mode=number&query={Uri.EscapeDataString(result.Entry.Number)}",
+                result),
+            BilhetagemDirectoryUpsertStatus.Updated => Results.Ok(result),
+            BilhetagemDirectoryUpsertStatus.Conflict => Results.Conflict(result),
+            _ => Results.Ok(result)
+        };
+    }
+    catch (InvalidOperationException exception)
+    {
+        return Results.Problem(
+            title: "Diretorio telefonico indisponivel",
+            detail: exception.Message,
+            statusCode: StatusCodes.Status503ServiceUnavailable);
+    }
 });
 
 bilhetagem.MapPost("/calls/report", async (
@@ -298,8 +321,18 @@ bilhetagem.MapPost("/calls/report", async (
         });
     }
 
-    var report = await service.GenerateReportAsync(filter!, cancellationToken);
-    return Results.Ok(report);
+    try
+    {
+        var report = await service.GenerateReportAsync(filter!, cancellationToken);
+        return Results.Ok(report);
+    }
+    catch (InvalidOperationException exception)
+    {
+        return Results.Problem(
+            title: "Relatorio de ligacoes indisponivel",
+            detail: exception.Message,
+            statusCode: StatusCodes.Status503ServiceUnavailable);
+    }
 });
 
 app.MapGet("/api/health/database", async (
