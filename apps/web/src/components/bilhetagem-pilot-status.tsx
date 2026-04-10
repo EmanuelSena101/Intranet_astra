@@ -92,15 +92,13 @@ export function BilhetagemPilotStatus() {
       ) : null}
 
       {state.status === "error" ? (
-        <div className="mt-6 rounded-2xl border border-[#d9917a] bg-[#fff2ee] px-4 py-4 text-sm text-[#8a3c28]">
-          {state.message}
-        </div>
+        <div className="brand-alert mt-6">{state.message}</div>
       ) : null}
 
       {state.status === "loaded" ? (
         <>
           <div className="mt-6 grid gap-4 md:grid-cols-4">
-            <div className="rounded-2xl border border-[var(--border)] bg-white/80 p-4">
+            <div className="brand-metric rounded-2xl p-4">
               <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--muted)]">
                 Módulo
               </p>
@@ -108,7 +106,7 @@ export function BilhetagemPilotStatus() {
                 {state.payload.module}
               </p>
             </div>
-            <div className="rounded-2xl border border-[var(--border)] bg-white/80 p-4">
+            <div className="brand-metric rounded-2xl p-4">
               <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--muted)]">
                 Diretório
               </p>
@@ -116,7 +114,7 @@ export function BilhetagemPilotStatus() {
                 {state.payload.directorySource}
               </p>
             </div>
-            <div className="rounded-2xl border border-[var(--border)] bg-white/80 p-4">
+            <div className="brand-metric rounded-2xl p-4">
               <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--muted)]">
                 Ligações
               </p>
@@ -124,7 +122,7 @@ export function BilhetagemPilotStatus() {
                 {state.payload.callsSource}
               </p>
             </div>
-            <div className="rounded-2xl border border-[var(--border)] bg-white/80 p-4">
+            <div className="brand-metric rounded-2xl p-4">
               <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--muted)]">
                 Status
               </p>
@@ -135,7 +133,7 @@ export function BilhetagemPilotStatus() {
           </div>
 
           <div className="mt-6 grid gap-6 lg:grid-cols-2">
-            <div className="rounded-[24px] border border-[var(--border)] bg-white/80 p-5">
+            <div className="brand-soft-panel rounded-[24px] p-5">
               <p className="text-sm font-semibold uppercase tracking-[0.14em] text-[var(--primary)]">
                 Telas mapeadas
               </p>
@@ -143,7 +141,7 @@ export function BilhetagemPilotStatus() {
                 {state.payload.screens.map((screen) => (
                   <div
                     key={screen}
-                    className="rounded-2xl border border-[var(--border)] bg-[#faf6ef] px-4 py-3 text-sm font-medium text-[var(--foreground)]"
+                    className="brand-soft-panel rounded-2xl px-4 py-3 text-sm font-medium text-[var(--foreground)]"
                   >
                     {screen}
                   </div>
@@ -151,7 +149,7 @@ export function BilhetagemPilotStatus() {
               </div>
             </div>
 
-            <div className="rounded-[24px] border border-[var(--border)] bg-white/80 p-5">
+            <div className="brand-soft-panel rounded-[24px] p-5">
               <p className="text-sm font-semibold uppercase tracking-[0.14em] text-[var(--primary)]">
                 Próximas entregas
               </p>
@@ -159,7 +157,7 @@ export function BilhetagemPilotStatus() {
                 {state.payload.firstDeliverables.map((deliverable, index) => (
                   <div
                     key={deliverable}
-                    className="flex items-center gap-3 rounded-2xl border border-[var(--border)] bg-[#faf6ef] px-4 py-3 text-sm"
+                    className="brand-soft-panel flex items-center gap-3 rounded-2xl px-4 py-3 text-sm"
                   >
                     <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[var(--primary)] text-xs font-semibold text-white">
                       {index + 1}

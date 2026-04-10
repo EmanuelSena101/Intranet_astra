@@ -60,7 +60,7 @@ export function LoginForm() {
           onChange={(event) =>
             setForm((current) => ({ ...current, username: event.target.value }))
           }
-          className="w-full rounded-2xl border border-[var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[var(--primary)]"
+          className="brand-input"
           autoComplete="username"
         />
       </div>
@@ -76,26 +76,24 @@ export function LoginForm() {
           onChange={(event) =>
             setForm((current) => ({ ...current, password: event.target.value }))
           }
-          className="w-full rounded-2xl border border-[var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[var(--primary)]"
+          className="brand-input"
           autoComplete="current-password"
         />
       </div>
 
       {error ? (
-        <div className="rounded-2xl border border-[#d9917a] bg-[#fff2ee] px-4 py-3 text-sm text-[#8a3c28]">
-          {error}
-        </div>
+        <div className="brand-alert">{error}</div>
       ) : null}
 
       <button
         type="submit"
         disabled={isSubmitting}
-        className="w-full rounded-2xl bg-[var(--primary)] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[var(--primary-strong)] disabled:cursor-not-allowed disabled:opacity-70"
+        className="brand-button-primary w-full"
       >
         {isSubmitting ? "Entrando..." : "Entrar"}
       </button>
 
-      <div className="rounded-2xl border border-[var(--border)] bg-[#faf6ef] px-4 py-3 text-sm leading-6 text-[var(--muted)]">
+      <div className="brand-soft-panel rounded-2xl px-4 py-4 text-sm leading-6 text-[var(--muted)]">
         <p className="font-semibold text-[var(--foreground)]">Usuários de desenvolvimento</p>
         <p>`admin` / `admin123`</p>
         <p>`bilhetagem` / `bilhetagem123`</p>

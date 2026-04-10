@@ -4,5 +4,8 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
-</Project>
 
+  <ItemGroup>
+    <PackageReference Include="System.Data.Odbc" Version="10.0.0" />
+  </ItemGroup>
+</Project>

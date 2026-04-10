@@ -69,22 +69,14 @@ export function BilhetagemSearch() {
           <button
             type="button"
             onClick={() => setMode("number")}
-            className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
-              mode === "number"
-                ? "bg-[var(--primary)] text-white"
-                : "border border-[var(--border)] bg-white/85 text-[var(--foreground)]"
-            }`}
+            className={`brand-pill ${mode === "number" ? "brand-pill-active" : ""}`}
           >
             Por telefone
           </button>
           <button
             type="button"
             onClick={() => setMode("description")}
-            className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
-              mode === "description"
-                ? "bg-[var(--primary)] text-white"
-                : "border border-[var(--border)] bg-white/85 text-[var(--foreground)]"
-            }`}
+            className={`brand-pill ${mode === "description" ? "brand-pill-active" : ""}`}
           >
             Por descrição
           </button>
@@ -99,21 +91,17 @@ export function BilhetagemSearch() {
             type="text"
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            className="w-full rounded-2xl border border-[var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[var(--primary)]"
+            className="brand-input"
             placeholder={mode === "number" ? "Ex.: 1934" : "Ex.: CLIENTE"}
           />
         </div>
 
-        {error ? (
-          <div className="mt-5 rounded-2xl border border-[#d9917a] bg-[#fff2ee] px-4 py-3 text-sm text-[#8a3c28]">
-            {error}
-          </div>
-        ) : null}
+        {error ? <div className="brand-alert mt-5">{error}</div> : null}
 
         <button
           type="submit"
           disabled={isLoading}
-          className="mt-6 rounded-2xl bg-[var(--primary)] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[var(--primary-strong)] disabled:cursor-not-allowed disabled:opacity-70"
+          className="brand-button-primary mt-6"
         >
           {isLoading ? "Pesquisando..." : "Pesquisar"}
         </button>
@@ -132,12 +120,12 @@ export function BilhetagemSearch() {
             Execute uma busca para listar os resultados do diretório telefônico.
           </p>
         ) : result.entries.length === 0 ? (
-          <div className="mt-6 rounded-2xl border border-[var(--border)] bg-white/80 px-4 py-4 text-sm text-[var(--muted)]">
+          <div className="brand-soft-panel mt-6 rounded-2xl px-4 py-4 text-sm text-[var(--muted)]">
             Nenhum registro encontrado para `{result.query}`.
           </div>
         ) : (
           <div className="mt-6 overflow-hidden rounded-[24px] border border-[var(--border)]">
-            <div className="grid grid-cols-[0.38fr_0.62fr] bg-[#eee4d6] px-4 py-3 text-xs font-semibold uppercase tracking-[0.12em] text-[var(--muted)]">
+            <div className="brand-table-head grid grid-cols-[0.38fr_0.62fr] px-4 py-3 text-xs font-semibold uppercase tracking-[0.12em] text-[var(--muted)]">
               <span>Número</span>
               <span>Descrição</span>
             </div>
@@ -160,4 +148,3 @@ export function BilhetagemSearch() {
     </div>
   );
 }
-

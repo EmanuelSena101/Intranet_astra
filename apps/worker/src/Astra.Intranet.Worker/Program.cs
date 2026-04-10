@@ -15,7 +15,7 @@ sealed class HeartbeatWorker(
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        var modules = [
+        string[] modules = [
             "Bilhetagem",
             "DocWeb",
             "FichaAcomp",
@@ -48,4 +48,3 @@ sealed class OpenEdgeOptions
         !string.IsNullOrWhiteSpace(Dsn) ||
         (!string.IsNullOrWhiteSpace(Host) && !string.IsNullOrWhiteSpace(Database));
 }
-

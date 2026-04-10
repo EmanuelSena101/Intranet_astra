@@ -161,7 +161,7 @@ app.MapPost("/api/auth/logout", async (HttpContext httpContext) =>
 
 app.MapGet("/api/auth/me", [Authorize] (ClaimsPrincipal user) =>
 {
-    return Results.Ok(ToCurrentUserResponse(user));
+    return Results.Ok(ToCurrentUserResponseFromPrincipal(user));
 });
 
 app.MapGet("/api/modules", [Authorize] (ClaimsPrincipal user) =>
@@ -601,7 +601,7 @@ static CurrentUserResponse ToCurrentUserResponse(AuthenticatedUser user) =>
         user.Roles.ToArray(),
         user.Modules.Order().ToArray());
 
-static CurrentUserResponse ToCurrentUserResponse(ClaimsPrincipal user) =>
+static CurrentUserResponse ToCurrentUserResponseFromPrincipal(ClaimsPrincipal user) =>
     new(
         user.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty,
         user.FindFirstValue("username") ?? string.Empty,
@@ -711,7 +711,7 @@ sealed class AuthUserOption
     public string[] Modules { get; init; } = [];
 }
 
-sealed class OpenEdgeOptions
+public sealed class OpenEdgeOptions
 {
     public const string SectionName = "OpenEdge";
 

@@ -89,7 +89,7 @@ export function BilhetagemEntryForm() {
               type="text"
               value={ddd}
               onChange={(event) => setDdd(event.target.value)}
-              className="w-full rounded-2xl border border-[var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[var(--primary)]"
+              className="brand-input"
               maxLength={3}
             />
           </div>
@@ -103,7 +103,7 @@ export function BilhetagemEntryForm() {
               type="text"
               value={telephone}
               onChange={(event) => setTelephone(event.target.value)}
-              className="w-full rounded-2xl border border-[var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[var(--primary)]"
+              className="brand-input"
               placeholder="Número sem hífen"
             />
           </div>
@@ -118,21 +118,17 @@ export function BilhetagemEntryForm() {
             type="text"
             value={description}
             onChange={(event) => setDescription(event.target.value)}
-            className="w-full rounded-2xl border border-[var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[var(--primary)]"
+            className="brand-input"
             placeholder="Razão social ou nome"
           />
         </div>
 
-        {error ? (
-          <div className="mt-5 rounded-2xl border border-[#d9917a] bg-[#fff2ee] px-4 py-3 text-sm text-[#8a3c28]">
-            {error}
-          </div>
-        ) : null}
+        {error ? <div className="brand-alert mt-5">{error}</div> : null}
 
         <button
           type="submit"
           disabled={isSubmitting}
-          className="mt-6 rounded-2xl bg-[var(--primary)] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[var(--primary-strong)] disabled:cursor-not-allowed disabled:opacity-70"
+          className="brand-button-primary mt-6"
         >
           {isSubmitting ? "Salvando..." : "Salvar descrição"}
         </button>
@@ -152,13 +148,13 @@ export function BilhetagemEntryForm() {
             atualiza telefone sem descrição ou retorna conflito se já houver descrição.
           </p>
         ) : (
-          <div className="mt-6 rounded-[24px] border border-[var(--border)] bg-white/85 p-5">
+          <div className="brand-soft-panel mt-6 rounded-[24px] p-5">
             <p className="text-sm font-semibold uppercase tracking-[0.14em] text-[var(--primary)]">
               {result.status}
             </p>
             <p className="mt-3 text-sm leading-6 text-[var(--muted)]">{result.message}</p>
             <div className="mt-5 grid gap-3 sm:grid-cols-2">
-              <div className="rounded-2xl border border-[var(--border)] bg-[#faf6ef] px-4 py-3">
+              <div className="brand-soft-panel rounded-2xl px-4 py-3">
                 <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--muted)]">
                   Número
                 </p>
@@ -166,7 +162,7 @@ export function BilhetagemEntryForm() {
                   {result.entry.number}
                 </p>
               </div>
-              <div className="rounded-2xl border border-[var(--border)] bg-[#faf6ef] px-4 py-3">
+              <div className="brand-soft-panel rounded-2xl px-4 py-3">
                 <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--muted)]">
                   Descrição
                 </p>

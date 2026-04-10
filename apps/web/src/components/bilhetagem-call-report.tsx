@@ -258,21 +258,17 @@ export function BilhetagemCallReport() {
               />
             )}
 
-            <div className="rounded-[24px] border border-[var(--border)] bg-[#faf6ef] p-5 text-sm leading-6 text-[var(--muted)]">
+            <div className="brand-soft-panel rounded-[24px] p-5 text-sm leading-6 text-[var(--muted)]">
               A tela replica a lógica do legado de `bl_ligacoes.htm`: período,
               recebidas/efetuadas, internas/externas, ramal/número e saída resumida ou detalhada.
             </div>
 
-            {error ? (
-              <div className="rounded-2xl border border-[#d9917a] bg-[#fff2ee] px-4 py-3 text-sm text-[#8a3c28]">
-                {error}
-              </div>
-            ) : null}
+            {error ? <div className="brand-alert">{error}</div> : null}
 
             <button
               type="submit"
               disabled={isLoading}
-              className="rounded-2xl bg-[var(--primary)] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[var(--primary-strong)] disabled:cursor-not-allowed disabled:opacity-70"
+              className="brand-button-primary"
             >
               {isLoading ? "Consultando..." : "Consultar"}
             </button>
@@ -326,7 +322,7 @@ export function BilhetagemCallReport() {
             </p>
           ) : report.filters.view === "summary" ? (
             <div className="mt-6 overflow-hidden rounded-[24px] border border-[var(--border)]">
-              <div className="grid grid-cols-[0.24fr_0.22fr_0.28fr_0.26fr] bg-[#eee4d6] px-4 py-3 text-xs font-semibold uppercase tracking-[0.12em] text-[var(--muted)]">
+              <div className="brand-table-head grid grid-cols-[0.24fr_0.22fr_0.28fr_0.26fr] px-4 py-3 text-xs font-semibold uppercase tracking-[0.12em] text-[var(--muted)]">
                 <span>Ramal</span>
                 <span>Total</span>
                 <span>Tempo</span>
@@ -354,7 +350,7 @@ export function BilhetagemCallReport() {
             </div>
           ) : (
             <div className="mt-6 overflow-hidden rounded-[24px] border border-[var(--border)]">
-              <div className="grid grid-cols-[0.12fr_0.1fr_0.16fr_0.16fr_0.08fr_0.12fr_0.14fr_0.12fr] bg-[#eee4d6] px-4 py-3 text-xs font-semibold uppercase tracking-[0.12em] text-[var(--muted)]">
+              <div className="brand-table-head grid grid-cols-[0.12fr_0.1fr_0.16fr_0.16fr_0.08fr_0.12fr_0.14fr_0.12fr] px-4 py-3 text-xs font-semibold uppercase tracking-[0.12em] text-[var(--muted)]">
                 <span>Data</span>
                 <span>Hora</span>
                 <span>Origem</span>
@@ -415,11 +411,7 @@ function FilterGroup({
             key={option.value}
             type="button"
             onClick={() => onChange(option.value)}
-            className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
-              value === option.value
-                ? "bg-[var(--primary)] text-white"
-                : "border border-[var(--border)] bg-white/85 text-[var(--foreground)]"
-            }`}
+            className={`brand-pill ${value === option.value ? "brand-pill-active" : ""}`}
           >
             {option.label}
           </button>
@@ -455,7 +447,7 @@ function Field({
         value={value}
         onChange={(event) => onChange(event.target.value)}
         placeholder={placeholder}
-        className="w-full rounded-2xl border border-[var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[var(--primary)]"
+        className="brand-input"
       />
     </div>
   );
@@ -463,7 +455,7 @@ function Field({
 
 function MetricCard({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-2xl border border-[var(--border)] bg-white/80 p-4">
+    <div className="brand-metric rounded-2xl p-4">
       <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--muted)]">
         {label}
       </p>
@@ -474,7 +466,7 @@ function MetricCard({ label, value }: { label: string; value: string }) {
 
 function FilterChip({ label }: { label: string }) {
   return (
-    <span className="rounded-full border border-[var(--border)] bg-[#faf6ef] px-3 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-[var(--muted)]">
+    <span className="brand-tag text-xs font-semibold uppercase tracking-[0.08em]">
       {label}
     </span>
   );
