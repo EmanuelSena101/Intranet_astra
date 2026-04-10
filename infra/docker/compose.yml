@@ -1,0 +1,71 @@
+services:
+  edge:
+    image: caddy:2.10-alpine
+    container_name: ${APP_NAME:-astra-intranet-modern}-edge
+    restart: unless-stopped
+    ports:
+      - "${HTTP_PORT:-8080}:80"
+    volumes:
+      - ../caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - web
+      - api
+
+  web:
+    image: ${WEB_IMAGE:-ghcr.io/example/astra-intranet-web}:${IMAGE_TAG:-latest}
+    container_name: ${APP_NAME:-astra-intranet-modern}-web
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      HOSTNAME: 0.0.0.0
+      NEXT_PUBLIC_API_BASE_URL: ${PUBLIC_API_BASE_URL:-/api}
+    expose:
+      - "3000"
+
+  api:
+    image: ${API_IMAGE:-ghcr.io/example/astra-intranet-api}:${IMAGE_TAG:-latest}
+    container_name: ${APP_NAME:-astra-intranet-modern}-api
+    restart: unless-stopped
+    environment:
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Production}
+      ASPNETCORE_URLS: http://0.0.0.0:8080
+      OpenEdge__Dsn: ${OPENEDGE_DSN:-}
+      OpenEdge__ConnectionString: ${OPENEDGE_CONNECTION_STRING:-}
+      OpenEdge__Host: ${OPENEDGE_HOST:-}
+      OpenEdge__Port: ${OPENEDGE_PORT:-}
+      OpenEdge__Database: ${OPENEDGE_DATABASE:-}
+      OpenEdge__Username: ${OPENEDGE_USERNAME:-}
+      OpenEdge__Password: ${OPENEDGE_PASSWORD:-}
+      ODBCINI: ${ODBCINI:-/etc/odbc.ini}
+      ODBCSYSINI: ${ODBCSYSINI:-/etc}
+      OPENEDGE_DRIVER_HOME: ${OPENEDGE_DRIVER_HOME:-/opt/openedge}
+    volumes:
+      - ../drivers/openedge:${OPENEDGE_DRIVER_HOME:-/opt/openedge}:ro
+    expose:
+      - "8080"
+
+  worker:
+    image: ${WORKER_IMAGE:-ghcr.io/example/astra-intranet-worker}:${IMAGE_TAG:-latest}
+    container_name: ${APP_NAME:-astra-intranet-modern}-worker
+    restart: unless-stopped
+    environment:
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Production}
+      OpenEdge__Dsn: ${OPENEDGE_DSN:-}
+      OpenEdge__ConnectionString: ${OPENEDGE_CONNECTION_STRING:-}
+      OpenEdge__Host: ${OPENEDGE_HOST:-}
+      OpenEdge__Port: ${OPENEDGE_PORT:-}
+      OpenEdge__Database: ${OPENEDGE_DATABASE:-}
+      OpenEdge__Username: ${OPENEDGE_USERNAME:-}
+      OpenEdge__Password: ${OPENEDGE_PASSWORD:-}
+      ODBCINI: ${ODBCINI:-/etc/odbc.ini}
+      ODBCSYSINI: ${ODBCSYSINI:-/etc}
+      OPENEDGE_DRIVER_HOME: ${OPENEDGE_DRIVER_HOME:-/opt/openedge}
+    volumes:
+      - ../drivers/openedge:${OPENEDGE_DRIVER_HOME:-/opt/openedge}:ro
+
+volumes:
+  caddy_data:
+  caddy_config:

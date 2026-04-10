@@ -1,0 +1,14 @@
+{
+  "name": "astra-intranet-modern",
+  "private": true,
+  "workspaces": [
+    "apps/web",
+    "tests/e2e"
+  ],
+  "scripts": {
+    "dev:web": "npm --workspace apps/web run dev",
+    "build:web": "npm --workspace apps/web run build",
+    "test:e2e": "npm --workspace tests/e2e run test"
+  }
+}
+
