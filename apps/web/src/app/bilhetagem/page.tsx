@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AdminOnly } from "@/components/admin-only";
 import { BilhetagemPilotStatus } from "@/components/bilhetagem-pilot-status";
 import { BrandMark } from "@/components/brand-mark";
 import { ModuleGuard } from "@/components/module-guard";
@@ -81,8 +82,9 @@ export default function BilhetagemPage() {
               ))}
             </div>
           </section>
-
-          <BilhetagemPilotStatus />
+          <AdminOnly>
+            <BilhetagemPilotStatus />
+          </AdminOnly>
         </div>
       </main>
     </ModuleGuard>

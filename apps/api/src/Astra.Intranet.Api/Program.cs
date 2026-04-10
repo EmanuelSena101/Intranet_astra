@@ -192,6 +192,11 @@ bilhetagem.MapGet("/bootstrap", (
         return Results.Forbid();
     }
 
+    if (!IsAdministrator(user))
+    {
+        return Results.Forbid();
+    }
+
     var bilhetagemOptions = options.Value;
 
     return Results.Ok(new
@@ -223,6 +228,11 @@ bilhetagem.MapGet("/diagnostics", async (
     CancellationToken cancellationToken) =>
 {
     if (!HasModuleAccess(user, "Bilhetagem"))
+    {
+        return Results.Forbid();
+    }
+
+    if (!IsAdministrator(user))
     {
         return Results.Forbid();
     }
@@ -392,6 +402,10 @@ app.Run();
 static bool HasModuleAccess(ClaimsPrincipal user, string module) =>
     user.FindAll("module").Any(claim =>
         string.Equals(claim.Value, module, StringComparison.OrdinalIgnoreCase));
+
+static bool IsAdministrator(ClaimsPrincipal user) =>
+    user.FindAll(ClaimTypes.Role).Any(claim =>
+        string.Equals(claim.Value, "Admin", StringComparison.OrdinalIgnoreCase));
 
 static bool TryParseSearchMode(string mode, out BilhetagemSearchMode parsedMode)
 {

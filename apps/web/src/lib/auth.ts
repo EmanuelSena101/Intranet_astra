@@ -51,3 +51,11 @@ export async function fetchCurrentUser(): Promise<SessionResult> {
     };
   }
 }
+
+export function hasRole(user: CurrentUser, role: string): boolean {
+  return user.roles.some((candidateRole) => candidateRole.toLowerCase() === role.toLowerCase());
+}
+
+export function isAdministrator(user: CurrentUser): boolean {
+  return hasRole(user, "Admin");
+}

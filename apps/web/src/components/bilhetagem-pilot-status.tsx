@@ -38,6 +38,7 @@ type BilhetagemDiagnostics = {
 type BootstrapState =
   | { status: "loading" }
   | { status: "loaded"; payload: BilhetagemBootstrap; diagnostics: BilhetagemDiagnostics }
+  | { status: "hidden" }
   | { status: "error"; message: string };
 
 export function BilhetagemPilotStatus() {
@@ -62,6 +63,14 @@ export function BilhetagemPilotStatus() {
             }
           })
         ]);
+
+        if (bootstrapResponse.status === 403 || diagnosticsResponse.status === 403) {
+          if (!cancelled) {
+            setState({ status: "hidden" });
+          }
+
+          return;
+        }
 
         if (!bootstrapResponse.ok || !diagnosticsResponse.ok) {
           const body = (await bootstrapResponse.json().catch(() => null)) as
@@ -104,6 +113,10 @@ export function BilhetagemPilotStatus() {
       cancelled = true;
     };
   }, []);
+
+  if (state.status === "hidden") {
+    return null;
+  }
 
   return (
     <article className="section-card rounded-[28px] p-6 md:p-8">
