@@ -22,9 +22,22 @@ type BilhetagemBootstrap = {
   };
 };
 
+type BilhetagemDiagnostics = {
+  connectionStatus: string;
+  connectionMessage: string;
+  probes: Array<{
+    key: string;
+    label: string;
+    status: string;
+    message: string;
+    tableName?: string | null;
+    columns: string[];
+  }>;
+};
+
 type BootstrapState =
   | { status: "loading" }
-  | { status: "loaded"; payload: BilhetagemBootstrap }
+  | { status: "loaded"; payload: BilhetagemBootstrap; diagnostics: BilhetagemDiagnostics }
   | { status: "error"; message: string };
 
 export function BilhetagemPilotStatus() {
@@ -35,15 +48,23 @@ export function BilhetagemPilotStatus() {
 
     async function loadBootstrap() {
       try {
-        const response = await fetch(apiUrl("/bilhetagem/bootstrap"), {
-          credentials: "include",
-          headers: {
-            Accept: "application/json"
-          }
-        });
+        const [bootstrapResponse, diagnosticsResponse] = await Promise.all([
+          fetch(apiUrl("/bilhetagem/bootstrap"), {
+            credentials: "include",
+            headers: {
+              Accept: "application/json"
+            }
+          }),
+          fetch(apiUrl("/bilhetagem/diagnostics"), {
+            credentials: "include",
+            headers: {
+              Accept: "application/json"
+            }
+          })
+        ]);
 
-        if (!response.ok) {
-          const body = (await response.json().catch(() => null)) as
+        if (!bootstrapResponse.ok || !diagnosticsResponse.ok) {
+          const body = (await bootstrapResponse.json().catch(() => null)) as
             | { error?: string; detail?: string; title?: string }
             | null;
 
@@ -61,10 +82,11 @@ export function BilhetagemPilotStatus() {
           return;
         }
 
-        const payload = (await response.json()) as BilhetagemBootstrap;
+        const payload = (await bootstrapResponse.json()) as BilhetagemBootstrap;
+        const diagnostics = (await diagnosticsResponse.json()) as BilhetagemDiagnostics;
 
         if (!cancelled) {
-          setState({ status: "loaded", payload });
+          setState({ status: "loaded", payload, diagnostics });
         }
       } catch {
         if (!cancelled) {
@@ -132,7 +154,7 @@ export function BilhetagemPilotStatus() {
                 Status
               </p>
               <p className="mt-2 text-sm font-semibold text-[var(--foreground)]">
-                {state.payload.status}
+                {state.diagnostics.connectionStatus}
               </p>
             </div>
           </div>
@@ -182,6 +204,41 @@ export function BilhetagemPilotStatus() {
               </div>
             </div>
           </div>
+
+          <div className="mt-6 rounded-[24px] border border-[var(--border)] bg-white/80 p-5">
+            <p className="text-sm font-semibold uppercase tracking-[0.14em] text-[var(--primary)]">
+              Diagnóstico OpenEdge
+            </p>
+            <p className="mt-3 text-sm leading-6 text-[var(--muted)]">
+              {state.diagnostics.connectionMessage}
+            </p>
+
+            <div className="mt-5 grid gap-4 lg:grid-cols-3">
+              {state.diagnostics.probes.map((probe) => (
+                <div key={probe.key} className="brand-soft-panel rounded-[22px] p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="text-sm font-semibold text-[var(--foreground)]">{probe.label}</p>
+                      <p className="mt-1 text-xs uppercase tracking-[0.12em] text-[var(--muted)]">
+                        {probe.status}
+                      </p>
+                    </div>
+                    <ProbeStatus status={probe.status} />
+                  </div>
+
+                  <p className="mt-3 text-sm leading-6 text-[var(--muted)]">{probe.message}</p>
+
+                  <div className="mt-4 space-y-2">
+                    <StatusRow label="Tabela" value={probe.tableName || "não informada"} />
+                    <StatusRow
+                      label="Colunas"
+                      value={probe.columns.length > 0 ? probe.columns.join(", ") : "não disponíveis"}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </>
       ) : null}
     </article>
@@ -197,4 +254,15 @@ function StatusRow({ label, value }: { label: string; value: string }) {
       <p className="mt-2 text-sm font-medium text-[var(--foreground)]">{value}</p>
     </div>
   );
+}
+
+function ProbeStatus({ status }: { status: string }) {
+  const colorClass =
+    status === "ok"
+      ? "bg-[var(--primary)]"
+      : status === "error"
+        ? "bg-[var(--secondary)]"
+        : "bg-[var(--muted)]";
+
+  return <span className={`mt-1 h-3 w-3 rounded-full ${colorClass}`} />;
 }

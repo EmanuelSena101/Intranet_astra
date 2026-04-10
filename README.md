@@ -65,6 +65,9 @@ O diretório telefônico está preparado para tentar `OpenEdge` quando `Bilhetag
 - `BILHETAGEM_CALLS_USERS_TABLE_NAME=...`
 - `BILHETAGEM_CALLS_*_FIELD=...`
 
+Depois de configurar as tabelas do Bilhetagem, o endpoint `GET /api/bilhetagem/diagnostics`
+passa a informar se conexão, tabelas e colunas do OpenEdge estão acessíveis.
+
 Exemplo de primeiro passo para sair do `mock` no diretório:
 
 1. preencher `OPENEDGE_*`

@@ -85,6 +85,7 @@ Pela leitura do legado, as tabelas mais importantes do piloto parecem ser:
 ## Endpoints iniciais no sistema novo
 
 - `GET /api/bilhetagem/bootstrap`
+- `GET /api/bilhetagem/diagnostics`
 - `GET /api/bilhetagem/phone-book/search`
 - `POST /api/bilhetagem/phone-book/entries`
 - `POST /api/bilhetagem/calls/report`
@@ -117,3 +118,4 @@ Pela leitura do legado, as tabelas mais importantes do piloto parecem ser:
 - o diretório já tenta `OpenEdge` primeiro quando a tabela for configurada, com fallback para `mock` em modo `auto`
 - `Ligacoes` já tenta `OpenEdge` primeiro quando `lig-ligacao` e a conexão estiverem configuradas, com fallback para `mock` em modo `auto`
 - a API de `Ligacoes` já lê período, número/ramal, descrição e dono da ligação a partir de `lig-ligacao`, `lig-destino` e `net-usuarios` quando essas tabelas forem informadas
+- `GET /api/bilhetagem/diagnostics` já verifica conexão, tabelas e colunas configuradas para diretório, ligações e usuários

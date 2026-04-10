@@ -72,6 +72,7 @@ builder.Services.AddAuthorization();
 builder.Services.AddSingleton<IAuthService, ConfiguredAuthService>();
 builder.Services.AddSingleton<MockBilhetagemDirectoryService>();
 builder.Services.AddSingleton<OpenEdgeBilhetagemDirectoryService>();
+builder.Services.AddSingleton<OpenEdgeBilhetagemDiagnosticsService>();
 builder.Services.AddSingleton<IBilhetagemDirectoryService, BilhetagemDirectoryService>();
 builder.Services.AddSingleton<MockBilhetagemCallsService>();
 builder.Services.AddSingleton<OpenEdgeBilhetagemCallsService>();
@@ -214,6 +215,20 @@ bilhetagem.MapGet("/bootstrap", (
             usersTableName = bilhetagemOptions.Calls.UsersTableName
         }
     });
+});
+
+bilhetagem.MapGet("/diagnostics", async (
+    ClaimsPrincipal user,
+    OpenEdgeBilhetagemDiagnosticsService diagnosticsService,
+    CancellationToken cancellationToken) =>
+{
+    if (!HasModuleAccess(user, "Bilhetagem"))
+    {
+        return Results.Forbid();
+    }
+
+    var diagnostics = await diagnosticsService.DiagnoseAsync(cancellationToken);
+    return Results.Ok(diagnostics);
 });
 
 bilhetagem.MapGet("/phone-book/search", async (
