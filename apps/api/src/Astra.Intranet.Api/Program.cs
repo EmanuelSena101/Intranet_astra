@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Authentication;
-using System.Data.Odbc;
 using System.Globalization;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -7,17 +6,25 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Options;
 using Astra.Intranet.Api.Bilhetagem;
 using Astra.Intranet.Api.DocWeb;
+using Astra.Intranet.Api.Health;
+using Astra.Intranet.Api.Shared.OpenEdge;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.Configure<OpenEdgeOptions>(
     builder.Configuration.GetSection(OpenEdgeOptions.SectionName));
+builder.Services.Configure<DatabaseHealthCheckOptions>(
+    builder.Configuration.GetSection(DatabaseHealthCheckOptions.SectionName));
 builder.Services.Configure<AuthOptions>(
     builder.Configuration.GetSection(AuthOptions.SectionName));
 builder.Services.Configure<BilhetagemOptions>(
     builder.Configuration.GetSection(BilhetagemOptions.SectionName));
 builder.Services.Configure<DocWebOptions>(
     builder.Configuration.GetSection(DocWebOptions.SectionName));
+
+builder.Services.AddSingleton(TimeProvider.System);
+builder.Services.AddSingleton<IOpenEdgeConnectionFactory, OpenEdgeConnectionFactory>();
+builder.Services.AddSingleton<DatabaseHealthCheck>();
 
 var allowedOrigins = builder.Configuration
     .GetSection("Frontend:AllowedOrigins")
@@ -465,40 +472,39 @@ docWeb.MapPost("/documents", async (
 });
 
 app.MapGet("/api/health/database", async (
-    IOptions<OpenEdgeOptions> options,
+    DatabaseHealthCheck healthCheck,
     CancellationToken cancellationToken) =>
 {
-    var connectionString = options.Value.BuildConnectionString();
+    var result = await healthCheck.CheckAsync(cancellationToken);
 
-    if (string.IsNullOrWhiteSpace(connectionString))
+    return result.Status switch
     {
-        return Results.Ok(new
-        {
-            status = "not-configured",
-            provider = "openedge-odbc"
-        });
-    }
-
-    try
-    {
-        using var connection = new OdbcConnection(connectionString);
-        await connection.OpenAsync(cancellationToken);
-
-        return Results.Ok(new
+        "ok" => Results.Json(new
         {
             status = "ok",
-            provider = "openedge-odbc",
-            dataSource = connection.DataSource,
-            database = connection.Database
-        });
-    }
-    catch (Exception ex)
-    {
-        return Results.Problem(
-            title: "OpenEdge connection failed",
-            detail: ex.Message,
-            statusCode: StatusCodes.Status503ServiceUnavailable);
-    }
+            dataSource = result.DataSource,
+            database = result.Database,
+            elapsedMs = result.ElapsedMs,
+            slow = result.Slow
+        }, statusCode: StatusCodes.Status200OK),
+        "mock" => Results.Json(new
+        {
+            status = "ok",
+            dataSource = "mock",
+            database = (string?)null,
+            elapsedMs = 0,
+            slow = false
+        }, statusCode: StatusCodes.Status200OK),
+        _ => Results.Json(new
+        {
+            status = "error",
+            dataSource = result.DataSource,
+            database = result.Database,
+            elapsedMs = result.ElapsedMs,
+            message = result.Message,
+            code = result.Code
+        }, statusCode: StatusCodes.Status503ServiceUnavailable)
+    };
 });
 
 app.Run();
@@ -1003,3 +1009,7 @@ public sealed class OpenEdgeOptions
         return $"HostName={Host};PortNumber={Port ?? 0};DatabaseName={Database};DefaultSchema=PUB;UID={Username};PWD={Password};";
     }
 }
+
+// Expõe a classe Program gerada implicitamente pelos top-level statements para
+// que WebApplicationFactory<Program> em testes de integração consiga carregá-la.
+public partial class Program;

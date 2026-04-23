@@ -1,22 +1,21 @@
 using System.Data;
 using System.Data.Common;
 using System.Data.Odbc;
+using Astra.Intranet.Api.Shared.OpenEdge;
 using Microsoft.Extensions.Options;
 
 namespace Astra.Intranet.Api.Bilhetagem;
 
 public sealed class OpenEdgeBilhetagemDiagnosticsService(
-    IOptions<global::OpenEdgeOptions> openEdgeOptions,
+    IOpenEdgeConnectionFactory connectionFactory,
     IOptions<BilhetagemOptions> bilhetagemOptions)
 {
-    private readonly global::OpenEdgeOptions _openEdgeOptions = openEdgeOptions.Value;
+    private readonly IOpenEdgeConnectionFactory _connectionFactory = connectionFactory;
     private readonly BilhetagemOptions _bilhetagemOptions = bilhetagemOptions.Value;
 
     public async Task<BilhetagemDiagnosticsResult> DiagnoseAsync(CancellationToken cancellationToken)
     {
-        var connectionString = _openEdgeOptions.BuildConnectionString();
-
-        if (string.IsNullOrWhiteSpace(connectionString))
+        if (!_connectionFactory.IsConfigured)
         {
             return new BilhetagemDiagnosticsResult(
                 "not-configured",
@@ -26,7 +25,7 @@ public sealed class OpenEdgeBilhetagemDiagnosticsService(
 
         try
         {
-            using var connection = new OdbcConnection(connectionString);
+            using var connection = (OdbcConnection)_connectionFactory.CreateConnection();
             await connection.OpenAsync(cancellationToken);
 
             var probes = new List<BilhetagemDiagnosticsProbe>

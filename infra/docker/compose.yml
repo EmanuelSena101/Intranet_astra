@@ -32,12 +32,20 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Production}
       ASPNETCORE_URLS: http://0.0.0.0:8080
-      OpenEdge__Dsn: ${OPENEDGE_DSN:-}
+      # Lidas pelo docker-entrypoint.sh para gerar /etc/odbc.ini
+      OPENEDGE_DSN: ${OPENEDGE_DSN:-AstraOpenEdge}
+      OPENEDGE_HOST: ${OPENEDGE_HOST:-}
+      OPENEDGE_PORT: ${OPENEDGE_PORT:-5555}
+      OPENEDGE_DATABASE: ${OPENEDGE_DATABASE:-}
+      OPENEDGE_USER: ${OPENEDGE_USER:-${OPENEDGE_USERNAME:-}}
+      OPENEDGE_PASSWORD: ${OPENEDGE_PASSWORD:-}
+      # Lidas pela API (.NET) via binding de configuração
+      OpenEdge__Dsn: ${OPENEDGE_DSN:-AstraOpenEdge}
       OpenEdge__ConnectionString: ${OPENEDGE_CONNECTION_STRING:-}
       OpenEdge__Host: ${OPENEDGE_HOST:-}
       OpenEdge__Port: ${OPENEDGE_PORT:-}
       OpenEdge__Database: ${OPENEDGE_DATABASE:-}
-      OpenEdge__Username: ${OPENEDGE_USERNAME:-}
+      OpenEdge__Username: ${OPENEDGE_USER:-${OPENEDGE_USERNAME:-}}
       OpenEdge__Password: ${OPENEDGE_PASSWORD:-}
       Bilhetagem__Directory__Provider: ${BILHETAGEM_DIRECTORY_PROVIDER:-auto}
       Bilhetagem__Directory__TableName: ${BILHETAGEM_DIRECTORY_TABLE_NAME:-}
@@ -63,9 +71,7 @@ services:
       DocWeb__Provider: ${DOCWEB_PROVIDER:-mock}
       ODBCINI: ${ODBCINI:-/etc/odbc.ini}
       ODBCSYSINI: ${ODBCSYSINI:-/etc}
-      OPENEDGE_DRIVER_HOME: ${OPENEDGE_DRIVER_HOME:-/opt/openedge}
-    volumes:
-      - ../drivers/openedge:${OPENEDGE_DRIVER_HOME:-/opt/openedge}:ro
+      OPENEDGE_DRIVER_HOME: ${OPENEDGE_DRIVER_HOME:-/opt/progress/odbc}
     expose:
       - "8080"
 
@@ -105,9 +111,7 @@ services:
       Bilhetagem__Calls__UserNameField: ${BILHETAGEM_CALLS_USER_NAME_FIELD:-nome}
       ODBCINI: ${ODBCINI:-/etc/odbc.ini}
       ODBCSYSINI: ${ODBCSYSINI:-/etc}
-      OPENEDGE_DRIVER_HOME: ${OPENEDGE_DRIVER_HOME:-/opt/openedge}
-    volumes:
-      - ../drivers/openedge:${OPENEDGE_DRIVER_HOME:-/opt/openedge}:ro
+      OPENEDGE_DRIVER_HOME: ${OPENEDGE_DRIVER_HOME:-/opt/progress/odbc}
 
 volumes:
   caddy_data:

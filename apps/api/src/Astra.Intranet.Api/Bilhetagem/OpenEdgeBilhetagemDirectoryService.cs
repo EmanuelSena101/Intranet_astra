@@ -1,19 +1,20 @@
 using System.Data.Odbc;
+using Astra.Intranet.Api.Shared.OpenEdge;
 using Microsoft.Extensions.Options;
 
 namespace Astra.Intranet.Api.Bilhetagem;
 
 public sealed class OpenEdgeBilhetagemDirectoryService(
-    IOptions<global::OpenEdgeOptions> openEdgeOptions,
+    IOpenEdgeConnectionFactory connectionFactory,
     IOptions<BilhetagemOptions> bilhetagemOptions)
 {
-    private readonly global::OpenEdgeOptions _openEdgeOptions = openEdgeOptions.Value;
+    private readonly IOpenEdgeConnectionFactory _connectionFactory = connectionFactory;
     private readonly BilhetagemDirectoryOptions _directoryOptions = bilhetagemOptions.Value.Directory;
 
     public string SourceName => "openedge";
 
     public bool IsConfigured =>
-        !string.IsNullOrWhiteSpace(_openEdgeOptions.BuildConnectionString()) &&
+        _connectionFactory.IsConfigured &&
         !string.IsNullOrWhiteSpace(_directoryOptions.TableName);
 
     public async Task<BilhetagemDirectorySearchResult?> SearchAsync(
@@ -152,7 +153,7 @@ public sealed class OpenEdgeBilhetagemDirectoryService(
     }
 
     private OdbcConnection CreateConnection() =>
-        new(_openEdgeOptions.BuildConnectionString()!);
+        (OdbcConnection)_connectionFactory.CreateConnection();
 
     private static string BuildNumber(string? ddd, string telephone)
     {

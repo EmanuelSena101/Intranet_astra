@@ -1,11 +1,12 @@
 using System.Data.Odbc;
 using System.Data.Common;
+using Astra.Intranet.Api.Shared.OpenEdge;
 using Microsoft.Extensions.Options;
 
 namespace Astra.Intranet.Api.Bilhetagem;
 
 public sealed class OpenEdgeBilhetagemCallsService(
-    IOptions<global::OpenEdgeOptions> openEdgeOptions,
+    IOpenEdgeConnectionFactory connectionFactory,
     IOptions<BilhetagemOptions> bilhetagemOptions)
 {
     private static readonly HashSet<string> PerformedTypeCodes =
@@ -18,13 +19,13 @@ public sealed class OpenEdgeBilhetagemCallsService(
         "CO"
     ];
 
-    private readonly global::OpenEdgeOptions _openEdgeOptions = openEdgeOptions.Value;
+    private readonly IOpenEdgeConnectionFactory _connectionFactory = connectionFactory;
     private readonly BilhetagemCallsOptions _callsOptions = bilhetagemOptions.Value.Calls;
 
     public string SourceName => "openedge";
 
     public bool IsConfigured =>
-        !string.IsNullOrWhiteSpace(_openEdgeOptions.BuildConnectionString()) &&
+        _connectionFactory.IsConfigured &&
         !string.IsNullOrWhiteSpace(_callsOptions.CallsTableName);
 
     public async Task<BilhetagemCallReportResult?> GenerateReportAsync(
@@ -499,7 +500,7 @@ public sealed class OpenEdgeBilhetagemCallsService(
     }
 
     private OdbcConnection CreateConnection() =>
-        new(_openEdgeOptions.BuildConnectionString()!);
+        (OdbcConnection)_connectionFactory.CreateConnection();
 
     private static int ParseDurationInSeconds(string duration)
     {
