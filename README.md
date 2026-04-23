@@ -46,6 +46,23 @@ O ambiente local atual não possui `dotnet` instalado, então os projetos `.NET`
 5. Evoluir o primeiro módulo piloto: `Bilhetagem`.
 6. Evoluir a primeira onda após o piloto: `DocWeb`.
 
+## Setup ODBC
+
+A API conecta no banco `Progress OpenEdge` via `unixODBC` + driver Progress
+instalado dentro do container. O driver é licenciado e **não** é versionado
+neste repositório — antes do primeiro build é preciso provisioná-lo em
+`infra/drivers/openedge/`.
+
+Passo a passo completo, variáveis de ambiente, troubleshooting e rotina de
+validação em **[docs/ODBC_SETUP.md](docs/ODBC_SETUP.md)**.
+
+Validação rápida após o build:
+
+```bash
+bash scripts/smoke-odbc.sh
+curl http://localhost:8080/api/health/database
+```
+
 ## Bilhetagem
 
 O piloto atual já cobre:

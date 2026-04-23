@@ -30,20 +30,28 @@ services:
 
   api:
     build:
-      context: ../../apps/api
-      dockerfile: Dockerfile
+      context: ../..
+      dockerfile: apps/api/Dockerfile
     image: astra-intranet-api:dev
     container_name: astra-intranet-modern-api-dev
     restart: unless-stopped
     environment:
       ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Development}
       ASPNETCORE_URLS: http://0.0.0.0:8080
-      OpenEdge__Dsn: ${OPENEDGE_DSN:-}
+      # Variáveis lidas pelo docker-entrypoint.sh para gerar /etc/odbc.ini
+      OPENEDGE_DSN: ${OPENEDGE_DSN:-AstraOpenEdge}
+      OPENEDGE_HOST: ${OPENEDGE_HOST:-}
+      OPENEDGE_PORT: ${OPENEDGE_PORT:-5555}
+      OPENEDGE_DATABASE: ${OPENEDGE_DATABASE:-}
+      OPENEDGE_USER: ${OPENEDGE_USER:-${OPENEDGE_USERNAME:-}}
+      OPENEDGE_PASSWORD: ${OPENEDGE_PASSWORD:-}
+      # Variáveis lidas pela API (.NET) via binding de configuração
+      OpenEdge__Dsn: ${OPENEDGE_DSN:-AstraOpenEdge}
       OpenEdge__ConnectionString: ${OPENEDGE_CONNECTION_STRING:-}
       OpenEdge__Host: ${OPENEDGE_HOST:-}
       OpenEdge__Port: ${OPENEDGE_PORT:-}
       OpenEdge__Database: ${OPENEDGE_DATABASE:-}
-      OpenEdge__Username: ${OPENEDGE_USERNAME:-}
+      OpenEdge__Username: ${OPENEDGE_USER:-${OPENEDGE_USERNAME:-}}
       OpenEdge__Password: ${OPENEDGE_PASSWORD:-}
       Bilhetagem__Directory__Provider: ${BILHETAGEM_DIRECTORY_PROVIDER:-auto}
       Bilhetagem__Directory__TableName: ${BILHETAGEM_DIRECTORY_TABLE_NAME:-}
@@ -67,11 +75,11 @@ services:
       Bilhetagem__Calls__UserIdField: ${BILHETAGEM_CALLS_USER_ID_FIELD:-registro}
       Bilhetagem__Calls__UserNameField: ${BILHETAGEM_CALLS_USER_NAME_FIELD:-nome}
       DocWeb__Provider: ${DOCWEB_PROVIDER:-mock}
+      # Paths padrão para unixODBC dentro do container (ver Dockerfile e
+      # docker-entrypoint.sh). Raramente precisam ser sobrescritos.
       ODBCINI: ${ODBCINI:-/etc/odbc.ini}
       ODBCSYSINI: ${ODBCSYSINI:-/etc}
-      OPENEDGE_DRIVER_HOME: ${OPENEDGE_DRIVER_HOME:-/opt/openedge}
-    volumes:
-      - ../drivers/openedge:${OPENEDGE_DRIVER_HOME:-/opt/openedge}:ro
+      OPENEDGE_DRIVER_HOME: ${OPENEDGE_DRIVER_HOME:-/opt/progress/odbc}
     expose:
       - "8080"
 
@@ -114,9 +122,7 @@ services:
       Bilhetagem__Calls__UserNameField: ${BILHETAGEM_CALLS_USER_NAME_FIELD:-nome}
       ODBCINI: ${ODBCINI:-/etc/odbc.ini}
       ODBCSYSINI: ${ODBCSYSINI:-/etc}
-      OPENEDGE_DRIVER_HOME: ${OPENEDGE_DRIVER_HOME:-/opt/openedge}
-    volumes:
-      - ../drivers/openedge:${OPENEDGE_DRIVER_HOME:-/opt/openedge}:ro
+      OPENEDGE_DRIVER_HOME: ${OPENEDGE_DRIVER_HOME:-/opt/progress/odbc}
 
 volumes:
   caddy_data:

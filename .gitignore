@@ -1,0 +1,28 @@
+# .NET build output
+bin/
+obj/
+*.user
+*.suo
+*.pdb
+
+# Node / Next.js
+node_modules/
+.next/
+dist/
+coverage/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Local env files
+infra/docker/.env
+.env
+.env.local
+
+# Driver ODBC Progress OpenEdge (licenciado — não commitar binário)
+infra/drivers/openedge/**
+!infra/drivers/openedge/README.md
+!infra/drivers/openedge/.gitkeep
