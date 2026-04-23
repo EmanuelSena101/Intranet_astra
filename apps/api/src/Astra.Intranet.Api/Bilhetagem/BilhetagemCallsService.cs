@@ -5,11 +5,13 @@ namespace Astra.Intranet.Api.Bilhetagem;
 public sealed class BilhetagemCallsService(
     IOptions<BilhetagemOptions> options,
     MockBilhetagemCallsService mockService,
-    OpenEdgeBilhetagemCallsService openEdgeService) : IBilhetagemCallsService
+    OpenEdgeBilhetagemCallsService openEdgeService,
+    ILogger<BilhetagemCallsService> logger) : IBilhetagemCallsService
 {
     private readonly BilhetagemOptions _options = options.Value;
     private readonly MockBilhetagemCallsService _mockService = mockService;
     private readonly OpenEdgeBilhetagemCallsService _openEdgeService = openEdgeService;
+    private readonly ILogger<BilhetagemCallsService> _logger = logger;
 
     public string SourceName => ResolveConfiguredProvider() switch
     {
@@ -36,8 +38,11 @@ public sealed class BilhetagemCallsService(
                     return result;
                 }
             }
-            catch when (ShouldFallbackToMock())
+            catch (Exception exception) when (ShouldFallbackToMock())
             {
+                _logger.LogWarning(
+                    exception,
+                    "Bilhetagem ligacoes voltou para mock apos falha no OpenEdge.");
             }
         }
 

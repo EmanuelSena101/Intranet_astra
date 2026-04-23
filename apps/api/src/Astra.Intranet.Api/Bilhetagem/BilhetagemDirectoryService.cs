@@ -5,11 +5,13 @@ namespace Astra.Intranet.Api.Bilhetagem;
 public sealed class BilhetagemDirectoryService(
     IOptions<BilhetagemOptions> options,
     MockBilhetagemDirectoryService mockService,
-    OpenEdgeBilhetagemDirectoryService openEdgeService) : IBilhetagemDirectoryService
+    OpenEdgeBilhetagemDirectoryService openEdgeService,
+    ILogger<BilhetagemDirectoryService> logger) : IBilhetagemDirectoryService
 {
     private readonly BilhetagemOptions _options = options.Value;
     private readonly MockBilhetagemDirectoryService _mockService = mockService;
     private readonly OpenEdgeBilhetagemDirectoryService _openEdgeService = openEdgeService;
+    private readonly ILogger<BilhetagemDirectoryService> _logger = logger;
 
     public string SourceName => ResolveConfiguredProvider() switch
     {
@@ -37,8 +39,11 @@ public sealed class BilhetagemDirectoryService(
                     return result;
                 }
             }
-            catch when (ShouldFallbackToMock())
+            catch (Exception exception) when (ShouldFallbackToMock())
             {
+                _logger.LogWarning(
+                    exception,
+                    "Bilhetagem diretorio voltou para mock apos falha no OpenEdge.");
             }
         }
 
@@ -64,8 +69,11 @@ public sealed class BilhetagemDirectoryService(
                     return result;
                 }
             }
-            catch when (ShouldFallbackToMock())
+            catch (Exception exception) when (ShouldFallbackToMock())
             {
+                _logger.LogWarning(
+                    exception,
+                    "Bilhetagem diretorio voltou para mock apos falha no OpenEdge durante gravacao.");
             }
         }
 

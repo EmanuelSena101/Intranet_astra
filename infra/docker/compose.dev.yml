@@ -66,6 +66,7 @@ services:
       Bilhetagem__Calls__DirectoryDescriptionField: ${BILHETAGEM_CALLS_DIRECTORY_DESCRIPTION_FIELD:-descricao}
       Bilhetagem__Calls__UserIdField: ${BILHETAGEM_CALLS_USER_ID_FIELD:-registro}
       Bilhetagem__Calls__UserNameField: ${BILHETAGEM_CALLS_USER_NAME_FIELD:-nome}
+      DocWeb__Provider: ${DOCWEB_PROVIDER:-mock}
       ODBCINI: ${ODBCINI:-/etc/odbc.ini}
       ODBCSYSINI: ${ODBCSYSINI:-/etc}
       OPENEDGE_DRIVER_HOME: ${OPENEDGE_DRIVER_HOME:-/opt/openedge}

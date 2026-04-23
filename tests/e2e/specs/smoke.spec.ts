@@ -1,6 +1,11 @@
 import { expect, test } from "@playwright/test";
 
-test("shell inicial responde", async ({ page }) => {
-  await page.goto("/");
-  await expect(page.getByText("Astra Intranet Modern")).toBeVisible();
+test("healthz responde", async ({ request }) => {
+  const response = await request.get("/api/healthz");
+
+  expect(response.ok()).toBeTruthy();
+
+  const payload = await response.json();
+  expect(payload.status).toBe("ok");
+  expect(payload.service).toBe("web");
 });

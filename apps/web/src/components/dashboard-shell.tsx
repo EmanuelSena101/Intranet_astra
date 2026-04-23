@@ -4,10 +4,7 @@ import Link from "next/link";
 import { BrandMark } from "@/components/brand-mark";
 import type { CurrentUser } from "@/components/types";
 import { apiUrl } from "@/lib/api";
-
-const moduleRoutes: Record<string, string> = {
-  Bilhetagem: "/bilhetagem"
-};
+import { getModuleDefinition } from "@/lib/modules";
 
 type DashboardShellProps = {
   user: CurrentUser;
@@ -15,7 +12,9 @@ type DashboardShellProps = {
 
 export function DashboardShell({ user }: DashboardShellProps) {
   const accessibleModules = [...user.modules].sort((left, right) => left.localeCompare(right));
-  const quickAccessModules = accessibleModules.filter((moduleName) => moduleRoutes[moduleName]);
+  const quickAccessModules = accessibleModules.filter(
+    (moduleName) => getModuleDefinition(moduleName)?.route
+  );
 
   async function handleLogout() {
     await fetch(apiUrl("/auth/logout"), {
@@ -109,7 +108,8 @@ export function DashboardShell({ user }: DashboardShellProps) {
 
             <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
               {accessibleModules.map((moduleName) => {
-                const route = moduleRoutes[moduleName];
+                const moduleDefinition = getModuleDefinition(moduleName);
+                const route = moduleDefinition?.route;
 
                 if (!route) {
                   return (
@@ -126,9 +126,14 @@ export function DashboardShell({ user }: DashboardShellProps) {
                   <Link
                     key={moduleName}
                     href={route}
-                    className="brand-soft-panel rounded-[22px] px-4 py-4 text-sm font-semibold text-[var(--foreground)] transition hover:-translate-y-0.5 hover:border-[var(--primary)]"
+                    className="brand-soft-panel rounded-[22px] px-4 py-4 transition hover:-translate-y-0.5 hover:border-[var(--primary)]"
                   >
-                    {moduleName}
+                    <p className="text-sm font-semibold text-[var(--foreground)]">{moduleName}</p>
+                    {moduleDefinition?.summary ? (
+                      <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
+                        {moduleDefinition.summary}
+                      </p>
+                    ) : null}
                   </Link>
                 );
               })}
@@ -169,7 +174,7 @@ export function DashboardShell({ user }: DashboardShellProps) {
                 {quickAccessModules.map((moduleName) => (
                   <Link
                     key={moduleName}
-                    href={moduleRoutes[moduleName]}
+                    href={getModuleDefinition(moduleName)?.route ?? "/"}
                     className="brand-pill brand-pill-active"
                   >
                     {moduleName}

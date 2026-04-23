@@ -31,6 +31,7 @@ Este repositório já nasce com:
 - placeholders de configuração para OpenEdge ODBC
 - piloto inicial de `Bilhetagem` com pesquisa e cadastro
 - `Bilhetagem > Ligacoes` pronto para tentar `OpenEdge` por configuração, com fallback para `mock`
+- `DocWeb` iniciado com consulta de circulares e cadastro de metadados em `mock`
 
 ## Observação importante
 
@@ -43,6 +44,7 @@ O ambiente local atual não possui `dotnet` instalado, então os projetos `.NET`
 3. Ajustar `infra/docker/.env.example` para um `.env` real.
 4. Subir localmente com `docker compose -f infra/docker/compose.dev.yml up --build`.
 5. Evoluir o primeiro módulo piloto: `Bilhetagem`.
+6. Evoluir a primeira onda após o piloto: `DocWeb`.
 
 ## Bilhetagem
 
@@ -74,3 +76,17 @@ Exemplo de primeiro passo para sair do `mock` no diretório:
 2. definir `BILHETAGEM_DIRECTORY_PROVIDER=auto`
 3. definir `BILHETAGEM_DIRECTORY_TABLE_NAME` com a tabela SQL equivalente a `lig-destino`
 4. subir a stack com `docker compose --env-file infra/docker/.env.example -f infra/docker/compose.dev.yml up --build`
+
+## DocWeb
+
+O módulo já cobre:
+
+- consulta de circulares por número, setor, título, arquivo e status
+- cadastro de informações de documento
+- status operacional para admin
+
+Configuração inicial:
+
+- `DOCWEB_PROVIDER=mock`
+
+Na fase atual o `DocWeb` ainda está em `mock`, mas já segue o mesmo padrão de módulo do shell novo.

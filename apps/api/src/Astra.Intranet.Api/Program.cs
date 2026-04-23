@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Options;
 using Astra.Intranet.Api.Bilhetagem;
+using Astra.Intranet.Api.DocWeb;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +16,8 @@ builder.Services.Configure<AuthOptions>(
     builder.Configuration.GetSection(AuthOptions.SectionName));
 builder.Services.Configure<BilhetagemOptions>(
     builder.Configuration.GetSection(BilhetagemOptions.SectionName));
+builder.Services.Configure<DocWebOptions>(
+    builder.Configuration.GetSection(DocWebOptions.SectionName));
 
 var allowedOrigins = builder.Configuration
     .GetSection("Frontend:AllowedOrigins")
@@ -77,6 +80,8 @@ builder.Services.AddSingleton<IBilhetagemDirectoryService, BilhetagemDirectorySe
 builder.Services.AddSingleton<MockBilhetagemCallsService>();
 builder.Services.AddSingleton<OpenEdgeBilhetagemCallsService>();
 builder.Services.AddSingleton<IBilhetagemCallsService, BilhetagemCallsService>();
+builder.Services.AddSingleton<MockDocWebDocumentService>();
+builder.Services.AddSingleton<IDocWebDocumentService, MockDocWebDocumentService>();
 
 var app = builder.Build();
 
@@ -360,6 +365,105 @@ bilhetagem.MapPost("/calls/report", async (
     }
 });
 
+var docWeb = app.MapGroup("/api/docweb").RequireAuthorization();
+
+docWeb.MapGet("/bootstrap", (
+    ClaimsPrincipal user,
+    IOptions<DocWebOptions> options,
+    IDocWebDocumentService service) =>
+{
+    if (!HasModuleAccess(user, "DocWeb"))
+    {
+        return Results.Forbid();
+    }
+
+    if (!IsAdministrator(user))
+    {
+        return Results.Forbid();
+    }
+
+    var snapshot = service.GetSnapshot();
+
+    return Results.Ok(new
+    {
+        module = "DocWeb",
+        status = "available",
+        provider = options.Value.Provider,
+        source = service.SourceName,
+        totalDocuments = snapshot.TotalDocuments,
+        publishedDocuments = snapshot.PublishedDocuments,
+        cancelledDocuments = snapshot.CancelledDocuments
+    });
+});
+
+docWeb.MapGet("/documents", async (
+    string? query,
+    string? status,
+    string? visibility,
+    ClaimsPrincipal user,
+    IDocWebDocumentService service,
+    CancellationToken cancellationToken) =>
+{
+    if (!HasModuleAccess(user, "DocWeb"))
+    {
+        return Results.Forbid();
+    }
+
+    if (!TryParseDocWebStatusFilter(status, out var parsedStatus))
+    {
+        return Results.BadRequest(new
+        {
+            error = "Status invalido. Use 'active', 'cancelled' ou 'all'."
+        });
+    }
+
+    if (!TryParseDocWebVisibilityFilter(visibility, out var parsedVisibility))
+    {
+        return Results.BadRequest(new
+        {
+            error = "Filtro de publicacao invalido. Use 'all', 'published' ou 'internal'."
+        });
+    }
+
+    var result = await service.SearchAsync(
+        new DocWebDocumentSearchFilter(query, parsedStatus, parsedVisibility),
+        cancellationToken);
+
+    return Results.Ok(result);
+});
+
+docWeb.MapPost("/documents", async (
+    DocWebDocumentUpsertRequest request,
+    ClaimsPrincipal user,
+    IDocWebDocumentService service,
+    CancellationToken cancellationToken) =>
+{
+    if (!HasModuleAccess(user, "DocWeb"))
+    {
+        return Results.Forbid();
+    }
+
+    var validationError = ValidateDocWebDocumentRequest(request);
+
+    if (validationError is not null)
+    {
+        return Results.BadRequest(new
+        {
+            error = validationError
+        });
+    }
+
+    var result = await service.UpsertAsync(request, cancellationToken);
+
+    return result.Status switch
+    {
+        DocWebDocumentUpsertStatus.Created => Results.Created(
+            $"/api/docweb/documents?query={Uri.EscapeDataString(result.Document.DocumentNumber)}",
+            result),
+        _ => Results.Ok(result)
+    };
+});
+
 app.MapGet("/api/health/database", async (
     IOptions<OpenEdgeOptions> options,
     CancellationToken cancellationToken) =>
@@ -423,6 +527,100 @@ static bool TryParseSearchMode(string mode, out BilhetagemSearchMode parsedMode)
 
     parsedMode = default;
     return false;
+}
+
+static bool TryParseDocWebStatusFilter(string? value, out DocWebDocumentStatusFilter status)
+{
+    if (string.IsNullOrWhiteSpace(value) || string.Equals(value, "active", StringComparison.OrdinalIgnoreCase))
+    {
+        status = DocWebDocumentStatusFilter.Active;
+        return true;
+    }
+
+    if (string.Equals(value, "cancelled", StringComparison.OrdinalIgnoreCase))
+    {
+        status = DocWebDocumentStatusFilter.Cancelled;
+        return true;
+    }
+
+    if (string.Equals(value, "all", StringComparison.OrdinalIgnoreCase))
+    {
+        status = DocWebDocumentStatusFilter.All;
+        return true;
+    }
+
+    status = default;
+    return false;
+}
+
+static bool TryParseDocWebVisibilityFilter(string? value, out DocWebDocumentVisibilityFilter visibility)
+{
+    if (string.IsNullOrWhiteSpace(value) || string.Equals(value, "all", StringComparison.OrdinalIgnoreCase))
+    {
+        visibility = DocWebDocumentVisibilityFilter.All;
+        return true;
+    }
+
+    if (string.Equals(value, "published", StringComparison.OrdinalIgnoreCase))
+    {
+        visibility = DocWebDocumentVisibilityFilter.Published;
+        return true;
+    }
+
+    if (string.Equals(value, "internal", StringComparison.OrdinalIgnoreCase))
+    {
+        visibility = DocWebDocumentVisibilityFilter.Internal;
+        return true;
+    }
+
+    visibility = default;
+    return false;
+}
+
+static string? ValidateDocWebDocumentRequest(DocWebDocumentUpsertRequest request)
+{
+    if (string.IsNullOrWhiteSpace(request.DocumentNumber))
+    {
+        return "Numero do documento obrigatorio.";
+    }
+
+    if (string.IsNullOrWhiteSpace(request.SectorCode))
+    {
+        return "Setor obrigatorio.";
+    }
+
+    if (string.IsNullOrWhiteSpace(request.Title))
+    {
+        return "Titulo obrigatorio.";
+    }
+
+    if (string.IsNullOrWhiteSpace(request.FileName))
+    {
+        return "Arquivo obrigatorio.";
+    }
+
+    if (request.FileSizeKilobytes < 0)
+    {
+        return "Tamanho do arquivo invalido.";
+    }
+
+    if (!string.IsNullOrWhiteSpace(request.ExpirationDate) &&
+        !DateOnly.TryParseExact(
+            request.ExpirationDate,
+            "yyyy-MM-dd",
+            CultureInfo.InvariantCulture,
+            DateTimeStyles.None,
+            out _))
+    {
+        return "Data de expiracao invalida.";
+    }
+
+    if ((request.RepresentativeCodes ?? []).Any(code => code <= 0))
+    {
+        return "Representantes invalidos.";
+    }
+
+    return null;
 }
 
 static string? ValidateDirectoryRequest(BilhetagemDirectoryUpsertRequest request)
